@@ -18,16 +18,13 @@ import java.util.Optional;
 import java.util.function.BiConsumer;
 
 public class UploadSideBar {
-    private VBox sidebar;
-    private Label titleLabel;
-    private BiConsumer<String, Character> loadDataCallback;
-    private List<String> uploadHistory; // List to store file paths
-    private final DataLoader dataLoader; // Re-added DataLoader instance
+    private final VBox sidebar;
+    private final BiConsumer<String, Character> loadDataCallback;
+    private final List<String> uploadHistory;
 
     public UploadSideBar(Label uploadStatusLabel, BiConsumer<String, Character> loadDataCallback, DataLoader dataLoader) {
         this.loadDataCallback = loadDataCallback;
-        this.dataLoader = dataLoader; // Initialize the DataLoader
-        this.uploadHistory = new ArrayList<>(); // Initialize the upload history list
+        this.uploadHistory = new ArrayList<>();
         sidebar = createUploadSideBar();
     }
 
@@ -39,7 +36,7 @@ public class UploadSideBar {
         VBox sidebar = new VBox();
         sidebar.getStyleClass().add("uploadSideBar");
 
-        titleLabel = new Label("SchemaInsight");
+        Label titleLabel = new Label("SchemaInsight");
         titleLabel.getStyleClass().add("sidebar-title");
 
         CustomButton uploadButton = CustomButton.createSidebarButton(
