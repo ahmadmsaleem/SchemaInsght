@@ -1,6 +1,6 @@
 package com.schemainsight.processing;
 
-public class CsvImportConfig {
+public class CSVImportConfig {
     static char delimiter;
     static int columnCount;
     static int skipRows;
@@ -11,16 +11,16 @@ public class CsvImportConfig {
     static boolean trimWhitespace;
     static boolean enableHeader;
 
-    public CsvImportConfig(char delimiter, int columnCount, int skipRows, String filePath, String dateFormat, String encoding, int batchSize, boolean trimWhitespace, boolean enableHeader) {
-        CsvImportConfig.delimiter = delimiter;
-        CsvImportConfig.columnCount = columnCount;
-        CsvImportConfig.skipRows = skipRows;
-        CsvImportConfig.filePath = filePath;
-        CsvImportConfig.dateFormat = dateFormat;
-        CsvImportConfig.encoding = encoding;
-        CsvImportConfig.batchSize = batchSize;
-        CsvImportConfig.trimWhitespace = trimWhitespace;
-        CsvImportConfig.enableHeader = enableHeader;
+    public CSVImportConfig(char delimiter, int columnCount, int skipRows, String filePath, String dateFormat, String encoding, int batchSize, boolean trimWhitespace, boolean enableHeader) {
+        CSVImportConfig.delimiter = delimiter;
+        CSVImportConfig.columnCount = columnCount;
+        CSVImportConfig.skipRows = skipRows;
+        CSVImportConfig.filePath = filePath;
+        CSVImportConfig.dateFormat = dateFormat;
+        CSVImportConfig.encoding = encoding;
+        CSVImportConfig.batchSize = batchSize;
+        CSVImportConfig.trimWhitespace = trimWhitespace;
+        CSVImportConfig.enableHeader = enableHeader;
     }
 
     public static char getDelimiter() {

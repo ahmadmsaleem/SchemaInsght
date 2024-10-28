@@ -21,7 +21,7 @@ public class ConnectionSideBar {
     }
 
     private void createConnectionUI() {
-        Label titleLabel = new Label("Database Connection");
+        Label titleLabel = new Label("Database");
         titleLabel.getStyleClass().add("sidebar-title");
 
         urlField = new TextField();
@@ -50,10 +50,7 @@ public class ConnectionSideBar {
         String username = usernameField.getText();
         String password = passwordField.getText();
 
-        // Here you can implement the logic to connect to your database.
-        // For now, we'll just simulate a successful connection.
         if (!url.isEmpty() && !username.isEmpty() && !password.isEmpty()) {
-            // Simulated connection success
             statusLabel.setText("SOON");
         } else {
             statusLabel.setText("SOON.");

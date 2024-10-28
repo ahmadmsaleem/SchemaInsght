@@ -42,8 +42,8 @@ public class CSVProcessor {
     }
 
     // Configuration Dialog to gather inputs
-    public static Optional<CsvImportConfig> ConfigurationTable(char detectedDelimiter, String filePath) {
-        Dialog<Optional<CsvImportConfig>> configurationDialog = new Dialog<>();
+    public static Optional<CSVImportConfig> ConfigurationTable(char detectedDelimiter, String filePath) {
+        Dialog<Optional<CSVImportConfig>> configurationDialog = new Dialog<>();
 
 
 
@@ -54,19 +54,17 @@ public class CSVProcessor {
         grid.setHgap(10);
         grid.setVgap(10);
 
-        // UI elements for the dialog
         TextField delimiterField = new TextField(String.valueOf(detectedDelimiter));
         TextField columnCountField = new TextField("10");
-        TextField skipRowsField = new TextField("0"); // Allow users to skip initial rows
+        TextField skipRowsField = new TextField("0");
         TextField dateFormatField = new TextField("yyyy-MM-dd");
-        TextField encodingField = new TextField("UTF-8"); // Default encoding, users can change
-        TextField batchSizeField = new TextField("1000"); // How many rows per batch to process
+        TextField encodingField = new TextField("UTF-8");
+        TextField batchSizeField = new TextField("1000");
         CheckBox trimWhitespaceCheckBox = new CheckBox("Trim whitespace");
-        trimWhitespaceCheckBox.setSelected(true); // Default selection
+        trimWhitespaceCheckBox.setSelected(true);
         CheckBox enableHeaderCheckBox = new CheckBox("Use first row as header");
-        enableHeaderCheckBox.setSelected(true); // Default selection
+        enableHeaderCheckBox.setSelected(true);
 
-        // Add all fields and labels to the grid
         grid.add(new Label("Enter delimiter:"), 0, 1);
         grid.add(delimiterField, 1, 1);
         grid.add(new Label("Expected column count:"), 0, 2);
@@ -90,25 +88,25 @@ public class CSVProcessor {
             if (dialogButton == ButtonType.OK) {
                 try {
                     // Retrieve input values from the dialog fields
-                    CsvImportConfig.delimiter = delimiterField.getText().charAt(0);
-                    CsvImportConfig.columnCount = Integer.parseInt(columnCountField.getText());
-                    CsvImportConfig.skipRows = Integer.parseInt(skipRowsField.getText());
-                    CsvImportConfig.dateFormat = dateFormatField.getText();
-                    CsvImportConfig.encoding = encodingField.getText();
-                    CsvImportConfig.batchSize = Integer.parseInt(batchSizeField.getText());
-                    CsvImportConfig.trimWhitespace = trimWhitespaceCheckBox.isSelected();
-                    CsvImportConfig.enableHeader = enableHeaderCheckBox.isSelected();
+                    CSVImportConfig.delimiter = delimiterField.getText().charAt(0);
+                    CSVImportConfig.columnCount = Integer.parseInt(columnCountField.getText());
+                    CSVImportConfig.skipRows = Integer.parseInt(skipRowsField.getText());
+                    CSVImportConfig.dateFormat = dateFormatField.getText();
+                    CSVImportConfig.encoding = encodingField.getText();
+                    CSVImportConfig.batchSize = Integer.parseInt(batchSizeField.getText());
+                    CSVImportConfig.trimWhitespace = trimWhitespaceCheckBox.isSelected();
+                    CSVImportConfig.enableHeader = enableHeaderCheckBox.isSelected();
 
-                    return Optional.of(new CsvImportConfig(
-                            CsvImportConfig.delimiter,
-                            CsvImportConfig.columnCount,
-                            CsvImportConfig.skipRows,
+                    return Optional.of(new CSVImportConfig(
+                            CSVImportConfig.delimiter,
+                            CSVImportConfig.columnCount,
+                            CSVImportConfig.skipRows,
                             filePath,
-                            CsvImportConfig.dateFormat,
-                            CsvImportConfig.encoding,
-                            CsvImportConfig.batchSize,
-                            CsvImportConfig.trimWhitespace,
-                            CsvImportConfig.enableHeader
+                            CSVImportConfig.dateFormat,
+                            CSVImportConfig.encoding,
+                            CSVImportConfig.batchSize,
+                            CSVImportConfig.trimWhitespace,
+                            CSVImportConfig.enableHeader
                     ));
                 } catch (NumberFormatException e) {
                     Alert alert = new Alert(Alert.AlertType.ERROR, "Please enter valid numeric values.");

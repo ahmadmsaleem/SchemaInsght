@@ -1,9 +1,6 @@
 package com.schemainsight.userinterface.sidebar;
 
-import javafx.collections.ObservableList;
-import javafx.collections.FXCollections;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.control.TableView;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.Priority;
@@ -12,17 +9,14 @@ import javafx.scene.layout.Region;
 import java.util.Map;
 
 public class TableInfoSideBar {
+    private final VBox sidebar;
+    private final VBox dataTypeVBox;
+    private final Label uploadStatusLabel;
 
-    private VBox sidebar;
-    private TableView<Map<String, String>> tableView;
-    private ObservableList<Map<String, String>> tableData = FXCollections.observableArrayList();
-    private VBox dataTypeVBox;
-    private Label uploadStatusLabel;
-
-    public TableInfoSideBar(TableView<Map<String, String>> tableView, Label uploadStatusLabel) {
-        this.tableView = tableView;
+    public TableInfoSideBar(Label uploadStatusLabel) {
         this.uploadStatusLabel = uploadStatusLabel;
         this.sidebar = createSidebar();
+        this.dataTypeVBox = createDataTypeVBox();
     }
 
     public VBox getSidebar() {
@@ -33,39 +27,43 @@ public class TableInfoSideBar {
         VBox sidebar = new VBox();
         sidebar.getStyleClass().add("tableInfoSideBar");
 
-        Label titleLabel = new Label("Table Info");
-        titleLabel.getStyleClass().addAll("sidebar-title", "table-info-label");
-
-
-
-        dataTypeVBox = new VBox();
-        dataTypeVBox.getStyleClass().add("unique-counts-container");
-
-        ScrollPane dataTypeScrollPane = new ScrollPane(dataTypeVBox);
-        dataTypeScrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
-        dataTypeScrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
-        dataTypeScrollPane.getStyleClass().add("scroll-pane");
+        Label titleLabel = createLabel("Table Info", "sidebar-title", "table-info-label");
+        ScrollPane dataTypeScrollPane = createDataTypeScrollPane();
 
         sidebar.getChildren().addAll(titleLabel, createSpacer(), dataTypeScrollPane, createSpacer(), uploadStatusLabel);
         return sidebar;
     }
 
+    private VBox createDataTypeVBox() {
+        VBox vBox = new VBox();
+        vBox.getStyleClass().add("unique-counts-container");
+        return vBox;
+    }
+
+    private ScrollPane createDataTypeScrollPane() {
+        ScrollPane scrollPane = new ScrollPane(dataTypeVBox);
+        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        scrollPane.getStyleClass().add("scroll-pane");
+        return scrollPane;
+    }
+
+    private Label createLabel(String text, String... styleClasses) {
+        Label label = new Label(text);
+        label.getStyleClass().addAll(styleClasses);
+        return label;
+    }
 
     public void updateDataTypes(Map<String, String> detectedDataTypes) {
         dataTypeVBox.getChildren().clear();
-        int count = 1;
-        Label dataTypeLabel = new Label("Data Types:");
-        dataTypeLabel.getStyleClass().add("data-type-header");
+        Label dataTypeLabel = createLabel("Data Types:", "data-type-header");
         dataTypeVBox.getChildren().add(dataTypeLabel);
 
+        int count = 1;
         for (Map.Entry<String, String> entry : detectedDataTypes.entrySet()) {
-            String header = entry.getKey();
-            String dataType = entry.getValue();
-            String labelText = String.format("%d. %s: %s", count, header, dataType);
-            Label headerLabel = new Label(labelText);
-            headerLabel.getStyleClass().add("data-type");
+            String labelText = String.format("%d. %s: %s", count++, entry.getKey(), entry.getValue());
+            Label headerLabel = createLabel(labelText, "data-type");
             dataTypeVBox.getChildren().add(headerLabel);
-            count++;
         }
     }
 
