@@ -43,12 +43,12 @@ public class CSVProcessor {
 
     // Configuration Dialog to gather inputs
     public static Optional<CsvImportConfig> ConfigurationTable(char detectedDelimiter, String filePath) {
-        Dialog<Optional<CsvImportConfig>> dialog = new Dialog<>();
+        Dialog<Optional<CsvImportConfig>> configurationDialog = new Dialog<>();
 
 
 
-        dialog.setTitle("Configuration Table");
-        dialog.setHeaderText("Configure your CSV import settings.");
+        configurationDialog.setTitle("Configuration Table");
+        configurationDialog.setHeaderText("Configure your CSV import settings.");
 
         GridPane grid = new GridPane();
         grid.setHgap(10);
@@ -82,12 +82,11 @@ public class CSVProcessor {
         grid.add(trimWhitespaceCheckBox, 0, 7, 2, 1);
         grid.add(enableHeaderCheckBox, 0, 8, 2, 1);
 
-        dialog.getDialogPane().setContent(grid);
-        dialog.getDialogPane().getButtonTypes().setAll(ButtonType.OK, ButtonType.CANCEL);
-        dialog.initStyle(StageStyle.UTILITY);
+        configurationDialog.getDialogPane().setContent(grid);
+        configurationDialog.getDialogPane().getButtonTypes().setAll(ButtonType.OK, ButtonType.CANCEL);
+        configurationDialog.initStyle(StageStyle.UTILITY);
 
-// Result conversion to create CsvImportConfig when OK is clicked
-        dialog.setResultConverter(dialogButton -> {
+        configurationDialog.setResultConverter(dialogButton -> {
             if (dialogButton == ButtonType.OK) {
                 try {
                     // Retrieve input values from the dialog fields
@@ -100,7 +99,6 @@ public class CSVProcessor {
                     CsvImportConfig.trimWhitespace = trimWhitespaceCheckBox.isSelected();
                     CsvImportConfig.enableHeader = enableHeaderCheckBox.isSelected();
 
-                    // Create a new CsvImportConfig instance with the static variables
                     return Optional.of(new CsvImportConfig(
                             CsvImportConfig.delimiter,
                             CsvImportConfig.columnCount,
@@ -120,14 +118,14 @@ public class CSVProcessor {
             }
             return Optional.empty();
         });
-        Button okButton = (Button) dialog.getDialogPane().lookupButton(ButtonType.OK);
+        Button okButton = (Button) configurationDialog.getDialogPane().lookupButton(ButtonType.OK);
         okButton.getStyleClass().add("ok");
-        Button cancelButton = (Button) dialog.getDialogPane().lookupButton(ButtonType.CANCEL);
+        Button cancelButton = (Button) configurationDialog.getDialogPane().lookupButton(ButtonType.CANCEL);
         cancelButton.getStyleClass().add("cancel");
-        dialog.getDialogPane().getStylesheets().add(CSVProcessor.class.getResource("/styles.css").toExternalForm());
-        dialog.getDialogPane().getStyleClass().add("myDialog");
+        configurationDialog.getDialogPane().getStylesheets().add(CSVProcessor.class.getResource("/styles.css").toExternalForm());
+        configurationDialog.getDialogPane().getStyleClass().add("myDialog");
 
-        return dialog.showAndWait().flatMap(result -> result);
+        return configurationDialog.showAndWait().flatMap(result -> result);
     }
 
 
