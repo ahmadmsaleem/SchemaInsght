@@ -10,12 +10,14 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
+import javafx.stage.StageStyle;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
+
 
 public class UploadSideBar {
     private final VBox sidebar;
@@ -81,17 +83,27 @@ public class UploadSideBar {
 
             confirmedConfigOpt.ifPresent(config -> {
                 loadDataCallback.accept(filePath, config.getDelimiter());
+                uploadHistory.remove(filePath);
                 uploadHistory.add(filePath);
             });
         }
     }
 
+
     private void viewUploadHistory() {
-        Dialog<String> historyDialog = new Dialog<>();
+        Dialog <String> historyDialog = new Dialog<>();
         historyDialog.setTitle("Upload History");
         historyDialog.setHeaderText("Previously Uploaded Files");
 
-        VBox content = new VBox();
+        historyDialog.getDialogPane().getStylesheets().add(getClass().getResource("/styles.css").toExternalForm());
+        historyDialog.getDialogPane().getStyleClass().add("myDialog");
+        historyDialog.initStyle(StageStyle.UTILITY);
+        historyDialog.setWidth(500);
+        historyDialog.setHeight(550);
+
+
+        VBox content = new VBox(10);
+        content.setPadding(new javafx.geometry.Insets(10));
         ListView<String> fileListView = new ListView<>();
 
         if (uploadHistory.isEmpty()) {
@@ -102,7 +114,12 @@ public class UploadSideBar {
         }
 
         historyDialog.getDialogPane().setContent(content);
-        historyDialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CLOSE);
+        historyDialog.getDialogPane().getButtonTypes().setAll(ButtonType.OK, ButtonType.CANCEL);
+
+        Button okButton = (Button) historyDialog.getDialogPane().lookupButton(ButtonType.OK);
+        okButton.getStyleClass().add("ok");
+        Button cancelButton = (Button) historyDialog.getDialogPane().lookupButton(ButtonType.CANCEL);
+        cancelButton.getStyleClass().add("cancel");
 
         historyDialog.setResultConverter(dialogButton -> {
             if (dialogButton == ButtonType.OK && fileListView.getSelectionModel().getSelectedItem() != null) {

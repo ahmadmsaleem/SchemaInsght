@@ -115,7 +115,7 @@
 
 .headers-dropdown .list-cell:hover {
     -fx-background-color: -fx-background-color-button-hover;
-    -fx-text-fill: #005797;
+    -fx-text-fill: #0082e0;
 }
 
 /* Search field */
@@ -205,19 +205,7 @@
     -fx-font-size: 10px;
 }
 
-
 .data-type-header{
-    -fx-padding: 2px;
-    -fx-text-fill: -fx-text-fill-default;
-    -fx-font-size: 16px;
-}
-.unique-counts-header{
-    -fx-padding: 2px;
-    -fx-text-fill: -fx-text-fill-default;
-    -fx-font-size: 16px;
-}
-
-.null-counts-header {
     -fx-padding: 2px;
     -fx-text-fill: -fx-text-fill-default;
     -fx-font-size: 16px;
@@ -227,25 +215,7 @@
     -fx-text-fill: -fx-text-fill-secondary;
     -fx-font-size: 12px;
 }
-.unique-count{
-    -fx-text-fill: -fx-text-fill-secondary;
-    -fx-font-size: 12px;
-}
-.unique-count:hover,
-.null-count:hover {
-    -fx-text-fill: #5f91ff; /* Change color on hover for visual feedback */
-}
 
-
-.null-count{
-    font-size: 12px;
-    -fx-text-fill:  -fx-text-fill-secondary;
-}
-
-.unique-counts-container {
-    -fx-text-fill: -fx-text-fill-default;
-    -fx-background-color: transparent;
-}
 
 .upload-status-label {
     -fx-text-fill: -fx-text-fill-default;
@@ -380,6 +350,29 @@
     -fx-font-size: 14px;
     -fx-padding: 5;
 }
+
+.myDialog .list-view {
+    -fx-background-color: #4E545D;
+    -fx-text-fill: white;
+    -fx-padding: 10;
+}
+
+.myDialog .list-view .list-cell {
+    -fx-background-color: #4E545D;
+    -fx-text-fill: white;
+    -fx-padding: 5;
+}
+
+.myDialog .list-view .list-cell:hover {
+    -fx-background-color: #3c4148;
+    -fx-text-fill: #0082e0;
+}
+
+.myDialog .list-view .list-cell:selected {
+    -fx-background-color: #0082e0;
+    -fx-text-fill: white;
+}
+
 /* Alert styles */
 .myAlert {
     -fx-background-color: -fx-background-color-dialog;
