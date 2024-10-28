@@ -16,7 +16,7 @@ SchemaInsight is a data analysis tool designed to help you quickly understand an
 
 1. **Clone the Repository:**
    ```bash
-   git clone [https://github.com/ahmadmsaleem/SchemaInsght.git](https://github.com/ahmadmsaleem/SchemaInsght.git)
+   git clone https://github.com/ahmadmsaleem/SchemaInsight.git
    ```
 
 **2. Build and Run:**
