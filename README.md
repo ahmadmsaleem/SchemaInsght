@@ -1,4 +1,4 @@
-# SchemaInsight
+# SchemaInsight (Under Development, not released yet)
 
 ## What is SchemaInsight?
 
