@@ -50,9 +50,9 @@ public class TopBarManager {
         Optional<ButtonType> result = searchDialog.showAndWait();
 
         if (result.isPresent() && result.get() == ButtonType.OK) {
-            TextField searchTermField = (TextField) searchDialog.getDialogPane().lookup(".text-field"); // Find the search term field
+            TextField searchTermField = (TextField) searchDialog.getDialogPane().lookup(".text-field");
             if (!searchTermField.getText().trim().isEmpty()) {
-                String searchTerm = searchTermField.getText(); // Get the search term
+                String searchTerm = searchTermField.getText();
 
                 FileSearcher fileSearcher = new FileSearcher();
                 Optional<String> searchResult = fileSearcher.searchInFile(latestFilePath, searchTerm);
@@ -63,10 +63,6 @@ public class TopBarManager {
         }
     }
 
-    private void handleSettings() {
-        // Implement settings dialog or action here
-        System.out.println("Settings button clicked");
-    }
 
     private void showDialog(String title, String headerText, String contentText) {
         Dialog<Void> warningDialog = new Dialog<>();

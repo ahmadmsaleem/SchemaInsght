@@ -30,7 +30,7 @@ public class Main extends Application {
         sideBarManager = new SideBarManager(tableView);
         sideBarManager.initializeSidebars(primaryStage, root);
 
-        TopBarManager topBarManager = new TopBarManager(sideBarManager, tableView);
+        TopBarManager topBarManager = new TopBarManager(sideBarManager);
         topBarManager.initializeTopBar(root);
 
         tableViewManager = new TableViewManager(tableView);
