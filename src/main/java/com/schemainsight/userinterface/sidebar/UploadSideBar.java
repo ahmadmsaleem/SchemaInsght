@@ -95,7 +95,7 @@ public class UploadSideBar {
         historyDialog.setTitle("Upload History");
         historyDialog.setHeaderText("Previously Uploaded Files");
 
-        historyDialog.getDialogPane().getStylesheets().add(getClass().getResource("/styles.css").toExternalForm());
+        historyDialog.getDialogPane().getStylesheets().add("styles.css");
         historyDialog.getDialogPane().getStyleClass().add("myDialog");
         historyDialog.initStyle(StageStyle.UTILITY);
         historyDialog.setWidth(500);
