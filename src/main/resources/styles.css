@@ -34,12 +34,12 @@
     -fx-alignment: center;
     -fx-font-family: "Verdana";
     -fx-font-weight: bold;
- /*   -fx-pref-width: 400px; */
+    -fx-pref-width: 250px;
 }
 
 /* Sidebar title */
 .sidebar-title {
-    -fx-font-size: 20px;
+    -fx-font-size: 18px;
     -fx-text-fill: -fx-text-fill-default;
 }
 

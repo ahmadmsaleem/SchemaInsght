@@ -23,15 +23,7 @@ public class DataTypeDetector {
             }
         }
 
-        printDataTypes(columnDataTypes);
         return columnDataTypes;
-    }
-
-    private static void printDataTypes(Map<String, String> dataTypes) {
-        System.out.println("Detected Data Types:");
-        for (Map.Entry<String, String> entry : dataTypes.entrySet()) {
-            System.out.printf("Column: %s, Data Type: %s%n", entry.getKey(), entry.getValue());
-        }
     }
 
     private static String updateDataType(String existingType, String value) {

@@ -18,8 +18,6 @@ public class SideBarManager {
     private final TableInfoSideBar tableInfoSideBar;
     private final ConnectionSideBar connectionSideBar;
     private final DataLoader dataLoader;
-    private static final double MIN_SIDEBAR_WIDTH = 130;
-    private static final double MAX_SIDEBAR_WIDTH = 350;
 
     public SideBarManager(TableView<Map<String, String>> tableView) {
         Label sideBarLabel = new Label();
@@ -31,9 +29,13 @@ public class SideBarManager {
     }
 
     public void initializeSidebars(Stage primaryStage, BorderPane root) {
-        VBox initialSideBar = uploadSideBarManager.getSidebar();
-        root.setLeft(initialSideBar);
-        addWidthListener(root, initialSideBar);
+        VBox uploadSidebar = uploadSideBarManager.getSidebar();
+        root.setLeft(uploadSidebar);
+        addWidthListener(root, uploadSidebar);
+        VBox tableInfoSidebar = tableInfoSideBar.getSidebar();
+        addWidthListener(root, tableInfoSidebar);
+        VBox connectionSidebar = connectionSideBar.getSidebar();
+        addWidthListener(root, connectionSidebar);
     }
 
     // Method to add a width listener to any sidebar
@@ -41,10 +43,10 @@ public class SideBarManager {
         root.widthProperty().addListener((obs, oldWidth, newWidth) -> {
             double calculatedWidth = newWidth.doubleValue() * 0.25;
 
-            if (calculatedWidth < MIN_SIDEBAR_WIDTH) {
-                sideBar.setPrefWidth(MIN_SIDEBAR_WIDTH);
-            } else if (calculatedWidth > MAX_SIDEBAR_WIDTH) {
-                sideBar.setPrefWidth(MAX_SIDEBAR_WIDTH);
+            if (calculatedWidth < 130) {
+                sideBar.setPrefWidth(130);
+            } else if (calculatedWidth > 350) {
+                sideBar.setPrefWidth(350);
             } else {
                 sideBar.setPrefWidth(calculatedWidth);
             }

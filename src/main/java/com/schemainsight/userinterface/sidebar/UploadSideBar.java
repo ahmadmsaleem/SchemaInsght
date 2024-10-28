@@ -18,11 +18,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 
-
 public class UploadSideBar {
     private final VBox sidebar;
     private final BiConsumer<String, Character> loadDataCallback;
-    private final List<String> uploadHistory;
+    private static List<String> uploadHistory;
 
     public UploadSideBar(Label uploadStatusLabel, BiConsumer<String, Character> loadDataCallback, DataLoader dataLoader) {
         this.loadDataCallback = loadDataCallback;
@@ -76,7 +75,7 @@ public class UploadSideBar {
         File file = fileChooser.showOpenDialog(primaryStage);
 
         if (file != null) {
-            String filePath = file.getAbsolutePath();
+            String filePath = ((File) file).getAbsolutePath();
             char detectedDelimiter = CSVProcessor.detectDelimiter(filePath);
 
             Optional<CsvImportConfig> confirmedConfigOpt = CSVProcessor.ConfigurationTable(detectedDelimiter, filePath);
@@ -89,9 +88,8 @@ public class UploadSideBar {
         }
     }
 
-
     private void viewUploadHistory() {
-        Dialog <String> historyDialog = new Dialog<>();
+        Dialog<String> historyDialog = new Dialog<>();
         historyDialog.setTitle("Upload History");
         historyDialog.setHeaderText("Previously Uploaded Files");
 
@@ -100,7 +98,6 @@ public class UploadSideBar {
         historyDialog.initStyle(StageStyle.UTILITY);
         historyDialog.setWidth(500);
         historyDialog.setHeight(550);
-
 
         VBox content = new VBox(10);
         content.setPadding(new javafx.geometry.Insets(10));
@@ -132,7 +129,6 @@ public class UploadSideBar {
         result.ifPresent(this::reUploadFile);
     }
 
-
     private void reUploadFile(String filePath) {
         char detectedDelimiter = CSVProcessor.detectDelimiter(filePath);
         Optional<CsvImportConfig> confirmedConfigOpt = CSVProcessor.ConfigurationTable(detectedDelimiter, filePath);
@@ -144,5 +140,12 @@ public class UploadSideBar {
         Region spacer = new Region();
         VBox.setVgrow(spacer, Priority.ALWAYS);
         return spacer;
+    }
+
+    public static String getLatestFilePath() {
+        if (!uploadHistory.isEmpty()) {
+            return uploadHistory.get(uploadHistory.size() - 1);
+        }
+        return null;
     }
 }

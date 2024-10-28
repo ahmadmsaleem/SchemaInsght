@@ -42,8 +42,8 @@ public class TableInfoSideBar {
         dataTypeVBox.getStyleClass().add("unique-counts-container");
 
         ScrollPane dataTypeScrollPane = new ScrollPane(dataTypeVBox);
-        dataTypeScrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
-        dataTypeScrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
+        dataTypeScrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        dataTypeScrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
         dataTypeScrollPane.getStyleClass().add("scroll-pane");
 
         sidebar.getChildren().addAll(titleLabel, createSpacer(), dataTypeScrollPane, createSpacer(), uploadStatusLabel);
