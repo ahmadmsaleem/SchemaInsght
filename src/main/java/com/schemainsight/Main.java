@@ -15,7 +15,6 @@ public class Main extends Application {
 
     private SideBarManager sideBarManager;
     private TableView<Map<String, String>> tableView = new TableView<>();
-    private TableViewManager tableViewManager;
 
     @Override
     public void start(Stage primaryStage) {
@@ -23,17 +22,17 @@ public class Main extends Application {
         Scene scene = new Scene(root, 900, 650);
         scene.getStylesheets().add("styles.css");
         primaryStage.setScene(scene);
-        primaryStage.setTitle("SchemaInsight - Data Engineering Tool");
+        primaryStage.setTitle("SchemaInsight - Data Tool");
         root.getStyleClass().add("main-pane");
 
         root.setCenter(tableView);
         sideBarManager = new SideBarManager(tableView);
         sideBarManager.initializeSidebars(primaryStage, root);
 
-        TopBarManager topBarManager = new TopBarManager(sideBarManager);
+        TopBarManager topBarManager = new TopBarManager(sideBarManager, tableView);
         topBarManager.initializeTopBar(root);
 
-        tableViewManager = new TableViewManager(tableView);
+        TableViewManager tableViewManager = new TableViewManager(tableView);
 
         primaryStage.show();
     }

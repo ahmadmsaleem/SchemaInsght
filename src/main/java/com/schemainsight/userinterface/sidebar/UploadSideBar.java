@@ -1,7 +1,7 @@
 package com.schemainsight.userinterface.sidebar;
 
+import com.schemainsight.processing.CSVImportConfig;
 import com.schemainsight.processing.CSVProcessor;
-import com.schemainsight.processing.CsvImportConfig;
 import com.schemainsight.processing.DataLoader;
 import com.schemainsight.userinterface.CustomButton;
 import javafx.scene.control.*;
@@ -21,12 +21,12 @@ import java.util.function.BiConsumer;
 public class UploadSideBar {
     private final VBox sidebar;
     private final BiConsumer<String, Character> loadDataCallback;
-    private static List<String> uploadHistory;
+    private static final List<String> uploadHistory = new ArrayList<>();
 
-    public UploadSideBar(Label uploadStatusLabel, BiConsumer<String, Character> loadDataCallback, DataLoader dataLoader) {
-        this.loadDataCallback = loadDataCallback;
-        this.uploadHistory = new ArrayList<>();
-        sidebar = createUploadSideBar();
+    // Updated constructor to accept DataLoader and retrieve the loadData method
+    public UploadSideBar(DataLoader dataLoader) {
+        this.loadDataCallback = dataLoader::uploadData; // Reference to the uploadData method
+        this.sidebar = createUploadSideBar();
     }
 
     public VBox getSidebar() {
@@ -37,35 +37,36 @@ public class UploadSideBar {
         VBox sidebar = new VBox();
         sidebar.getStyleClass().add("uploadSideBar");
 
-        Label titleLabel = new Label("SchemaInsight");
-        titleLabel.getStyleClass().add("sidebar-title");
-
-        CustomButton uploadButton = CustomButton.createSidebarButton(
-                "Upload File",
-                "Supports CSV file uploads only.",
-                event -> uploadFile()
-        );
-
-        CustomButton viewUploadHistoryButton = CustomButton.createSidebarButton(
-                "View Upload History",
-                "See previously uploaded files.",
-                event -> viewUploadHistory()
-        );
-
-        CustomButton viewSchemaButton = CustomButton.createSidebarButton(
-                "View Schema",
-                null,
-                event -> System.out.println("viewSchemaButton")
-        );
-
-        CustomButton exitButton = CustomButton.createSidebarButton(
-                "Exit",
-                null,
-                event -> System.exit(0)
-        );
+        Label titleLabel = createLabel();
+        CustomButton uploadButton = createUploadButton();
+        CustomButton viewUploadHistoryButton = createHistoryButton();
+        CustomButton viewSchemaButton = createSchemaButton();
+        CustomButton exitButton = createExitButton();
 
         sidebar.getChildren().addAll(titleLabel, uploadButton, viewUploadHistoryButton, viewSchemaButton, createSpacer(), exitButton);
         return sidebar;
+    }
+
+    private Label createLabel() {
+        Label label = new Label("SchemaInsight");
+        label.getStyleClass().add("sidebar-title");
+        return label;
+    }
+
+    private CustomButton createUploadButton() {
+        return CustomButton.createSidebarButton("Upload File", "Supports CSV file uploads only.", event -> uploadFile());
+    }
+
+    private CustomButton createHistoryButton() {
+        return CustomButton.createSidebarButton("View Upload History", "See previously uploaded files.", event -> viewUploadHistory());
+    }
+
+    private CustomButton createSchemaButton() {
+        return CustomButton.createSidebarButton("View Schema", null, event -> System.out.println("viewSchemaButton"));
+    }
+
+    private CustomButton createExitButton() {
+        return CustomButton.createSidebarButton("Exit", null, event -> System.exit(0));
     }
 
     private void uploadFile() {
@@ -75,24 +76,26 @@ public class UploadSideBar {
         File file = fileChooser.showOpenDialog(primaryStage);
 
         if (file != null) {
-            String filePath = ((File) file).getAbsolutePath();
+            String filePath = file.getAbsolutePath();
             char detectedDelimiter = CSVProcessor.detectDelimiter(filePath);
-
-            Optional<CsvImportConfig> confirmedConfigOpt = CSVProcessor.ConfigurationTable(detectedDelimiter, filePath);
+            Optional<CSVImportConfig> confirmedConfigOpt = CSVProcessor.ConfigurationTable(detectedDelimiter, filePath);
 
             confirmedConfigOpt.ifPresent(config -> {
-                loadDataCallback.accept(filePath, config.getDelimiter());
-                uploadHistory.remove(filePath);
-                uploadHistory.add(filePath);
+                loadDataCallback.accept(filePath, detectedDelimiter); // Pass the detected delimiter here
+                updateUploadHistory(filePath);
             });
         }
+    }
+
+    private void updateUploadHistory(String filePath) {
+        uploadHistory.remove(filePath);
+        uploadHistory.add(filePath);
     }
 
     private void viewUploadHistory() {
         Dialog<String> historyDialog = new Dialog<>();
         historyDialog.setTitle("Upload History");
         historyDialog.setHeaderText("Previously Uploaded Files");
-
         historyDialog.getDialogPane().getStylesheets().add("styles.css");
         historyDialog.getDialogPane().getStyleClass().add("myDialog");
         historyDialog.initStyle(StageStyle.UTILITY);
@@ -131,21 +134,17 @@ public class UploadSideBar {
 
     private void reUploadFile(String filePath) {
         char detectedDelimiter = CSVProcessor.detectDelimiter(filePath);
-        Optional<CsvImportConfig> confirmedConfigOpt = CSVProcessor.ConfigurationTable(detectedDelimiter, filePath);
+        Optional<CSVImportConfig> confirmedConfigOpt = CSVProcessor.ConfigurationTable(detectedDelimiter, filePath);
+        confirmedConfigOpt.ifPresent(config -> loadDataCallback.accept(filePath, detectedDelimiter)); // Pass the detected delimiter here
+    }
 
-        confirmedConfigOpt.ifPresent(config -> loadDataCallback.accept(filePath, config.getDelimiter()));
+    public static String getLatestFilePath() {
+        return uploadHistory.isEmpty() ? null : uploadHistory.get(uploadHistory.size() - 1); // Fixed to get last item
     }
 
     private Region createSpacer() {
         Region spacer = new Region();
         VBox.setVgrow(spacer, Priority.ALWAYS);
         return spacer;
-    }
-
-    public static String getLatestFilePath() {
-        if (!uploadHistory.isEmpty()) {
-            return uploadHistory.get(uploadHistory.size() - 1);
-        }
-        return null;
     }
 }
