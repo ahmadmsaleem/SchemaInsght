@@ -122,7 +122,7 @@ public class CSVProcessor {
         okButton.getStyleClass().add("ok");
         Button cancelButton = (Button) configurationDialog.getDialogPane().lookupButton(ButtonType.CANCEL);
         cancelButton.getStyleClass().add("cancel");
-        configurationDialog.getDialogPane().getStylesheets().add(CSVProcessor.class.getResource("/styles.css").toExternalForm());
+        configurationDialog.getDialogPane().getStylesheets().add("styles.css");
         configurationDialog.getDialogPane().getStyleClass().add("myDialog");
 
         return configurationDialog.showAndWait().flatMap(result -> result);
