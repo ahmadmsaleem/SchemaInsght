@@ -107,10 +107,10 @@ public class TopBarManager {
 
         // UI elements for the dialog
         TextField searchTermField = new TextField();
-        searchTermField.setPromptText("Search for:");
+        searchTermField.setPromptText("Search:");
         searchTermField.getStyleClass().add("search-term-field");
         TextField batchSizeField = new TextField("1000");
-        batchSizeField.setPromptText("Batch size:");
+        batchSizeField.setPromptText("Batch:");
         batchSizeField.getStyleClass().add("batch-size-field");
 
         GridPane grid = new GridPane();

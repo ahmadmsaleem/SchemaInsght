@@ -20,21 +20,21 @@ public class DataLoader {
         this.tableInfoSideBar = tableInfoSideBar;
     }
 
-    public void loadData(String filePath, char confirmedDelimiter, String batchTerm) {
+    public void loadData(String filePath, char confirmedDelimiter, int batchTerm) {
         clearPreviousData();
         if (!CSVProcessor.validateCSV(filePath, confirmedDelimiter).isValid()) {
             return;
         }
         List<String> headers = CSVProcessor.getHeaders(filePath, confirmedDelimiter);
         Map<String, String> detectedDataTypes = DataTypeDetector.detectDataTypes(filePath, confirmedDelimiter);
-        List<Map<String, String>> allData = CSVProcessor.readCSVFile(filePath, confirmedDelimiter, Integer.parseInt(batchTerm));
+        List<Map<String, String>> allData = CSVProcessor.readCSVFile(filePath, confirmedDelimiter, batchTerm);
         tableInfoSideBar.updateDataTypes(detectedDataTypes);
         updateTableView(headers);
         tableData.addAll(allData);
         tableView.setItems(tableData);
     }
     public void uploadData(String filePath, char confirmedDelimiter) {
-        loadData(filePath, confirmedDelimiter, String.valueOf(CSVImportConfig.getBatchSize()));
+        loadData(filePath, confirmedDelimiter, CSVImportConfig.getBatchSize());
     }
 
     private void clearPreviousData() {

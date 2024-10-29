@@ -1,27 +1,35 @@
 package com.schemainsight.processing;
-import java.io.BufferedReader;
+
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
+
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.Reader;
 import java.util.*;
-
 
 public class FileSearcher {
 
     public List<Map<String, String>> searchInFileAsMap(String filePath, String searchTerm, int batchTerm) {
         List<Map<String, String>> matchedRows = new ArrayList<>();
 
-        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
-            String line = br.readLine();
-            if (line == null) return matchedRows;
+        try (Reader reader = new FileReader(filePath);
+             CSVParser parser = CSVFormat.DEFAULT
+                     .withDelimiter(CSVImportConfig.getDelimiter()) // Assuming `CSVImportConfig` has a method to get delimiter
+                     .withFirstRecordAsHeader()
+                     .parse(reader)) {
 
-            String[] headers = line.split(String.valueOf(CSVImportConfig.getDelimiter()));
+            // Retrieve headers from the CSV file
+            List<String> headers = parser.getHeaderNames();
 
-            while ((line = br.readLine()) != null) {
-                if (line.contains(searchTerm)) {
-                    String[] values = line.split(String.valueOf(CSVImportConfig.getDelimiter()));
+            // Iterate over each record
+            for (CSVRecord record : parser) {
+                if (record.toString().contains(searchTerm)) {
                     Map<String, String> rowMap = new LinkedHashMap<>();
-                    for (int i = 0; i < headers.length; i++) {
-                        rowMap.put(headers[i], i < values.length ? values[i] : "");
+
+                    for (String header : headers) {
+                        rowMap.put(header, record.get(header));
                     }
                     matchedRows.add(rowMap);
 
@@ -36,6 +44,4 @@ public class FileSearcher {
 
         return matchedRows;
     }
-
-
 }

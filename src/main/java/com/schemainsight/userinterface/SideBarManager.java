@@ -8,7 +8,6 @@ import javafx.scene.control.TableView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import javafx.scene.control.Label;
 
 import java.util.Map;
 
@@ -19,9 +18,8 @@ public class SideBarManager {
     private final DataLoader dataLoader;
 
     public SideBarManager(TableView<Map<String, String>> tableView) {
-        Label sideBarLabel = new Label();
 
-        this.tableInfoSideBar = new TableInfoSideBar(sideBarLabel);
+        this.tableInfoSideBar = new TableInfoSideBar(tableView);
         this.dataLoader = new DataLoader(tableView, tableInfoSideBar);
         this.uploadSideBar = new UploadSideBar(dataLoader); // Pass the DataLoader directly
         this.connectionSideBar = new ConnectionSideBar();
