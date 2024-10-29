@@ -45,8 +45,6 @@ public class CSVProcessor {
     public static Optional<CSVImportConfig> ConfigurationTable(char detectedDelimiter, String filePath) {
         Dialog<Optional<CSVImportConfig>> configurationDialog = new Dialog<>();
 
-
-
         configurationDialog.setTitle("Configuration Table");
         configurationDialog.setHeaderText("Configure your CSV import settings.");
 
@@ -58,6 +56,7 @@ public class CSVProcessor {
         TextField columnCountField = new TextField("10");
         TextField skipRowsField = new TextField("0");
         TextField dateFormatField = new TextField("yyyy-MM-dd");
+        TextField timestampFormatField = new TextField("yyyy-MM-dd HH:mm:ss");
         TextField encodingField = new TextField("UTF-8");
         TextField batchSizeField = new TextField("1000");
         CheckBox trimWhitespaceCheckBox = new CheckBox("Trim whitespace");
@@ -73,12 +72,14 @@ public class CSVProcessor {
         grid.add(skipRowsField, 1, 3);
         grid.add(new Label("Date format:"), 0, 4);
         grid.add(dateFormatField, 1, 4);
-        grid.add(new Label("Encoding:"), 0, 5);
-        grid.add(encodingField, 1, 5);
-        grid.add(new Label("Batch size:"), 0, 6);
-        grid.add(batchSizeField, 1, 6);
-        grid.add(trimWhitespaceCheckBox, 0, 7, 2, 1);
-        grid.add(enableHeaderCheckBox, 0, 8, 2, 1);
+        grid.add(new Label("Timestamp format:"), 0, 5);
+        grid.add(timestampFormatField, 1, 5);
+        grid.add(new Label("Encoding:"), 0, 6);
+        grid.add(encodingField, 1, 6);
+        grid.add(new Label("Batch size:"), 0, 7);
+        grid.add(batchSizeField, 1, 7);
+        grid.add(trimWhitespaceCheckBox, 0, 8, 2, 1);
+        grid.add(enableHeaderCheckBox, 0, 9, 2, 1);
 
         configurationDialog.getDialogPane().setContent(grid);
         configurationDialog.getDialogPane().getButtonTypes().setAll(ButtonType.OK, ButtonType.CANCEL);
@@ -87,22 +88,19 @@ public class CSVProcessor {
         configurationDialog.setResultConverter(dialogButton -> {
             if (dialogButton == ButtonType.OK) {
                 try {
-                    // Retrieve input values from the dialog fields
                     CSVImportConfig.delimiter = delimiterField.getText().charAt(0);
-                    CSVImportConfig.columnCount = Integer.parseInt(columnCountField.getText());
-                    CSVImportConfig.skipRows = Integer.parseInt(skipRowsField.getText());
+                    CSVImportConfig.skipRows = skipRowsField.getText().charAt(0);
                     CSVImportConfig.dateFormat = dateFormatField.getText();
+                    CSVImportConfig.timestampFormat = timestampFormatField.getText();
                     CSVImportConfig.encoding = encodingField.getText();
                     CSVImportConfig.batchSize = Integer.parseInt(batchSizeField.getText());
                     CSVImportConfig.trimWhitespace = trimWhitespaceCheckBox.isSelected();
                     CSVImportConfig.enableHeader = enableHeaderCheckBox.isSelected();
-
                     return Optional.of(new CSVImportConfig(
                             CSVImportConfig.delimiter,
-                            CSVImportConfig.columnCount,
                             CSVImportConfig.skipRows,
-                            filePath,
                             CSVImportConfig.dateFormat,
+                            CSVImportConfig.timestampFormat,
                             CSVImportConfig.encoding,
                             CSVImportConfig.batchSize,
                             CSVImportConfig.trimWhitespace,
@@ -116,6 +114,7 @@ public class CSVProcessor {
             }
             return Optional.empty();
         });
+
         Button okButton = (Button) configurationDialog.getDialogPane().lookupButton(ButtonType.OK);
         okButton.getStyleClass().add("ok");
         Button cancelButton = (Button) configurationDialog.getDialogPane().lookupButton(ButtonType.CANCEL);

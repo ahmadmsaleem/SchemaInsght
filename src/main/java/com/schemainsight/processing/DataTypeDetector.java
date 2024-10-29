@@ -1,5 +1,9 @@
 package com.schemainsight.processing;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,12 +18,13 @@ public class DataTypeDetector {
             return columnDataTypes;
         }
 
-        String[] headers = data.getFirst().keySet().toArray(new String[0]);
+        String[] headers = data.get(0).keySet().toArray(new String[0]); // Access the first row for headers
 
         for (int rowCount = 0; rowCount < Math.min(data.size(), 500); rowCount++) {
             for (String header : headers) {
                 String value = data.get(rowCount).get(header);
-                columnDataTypes.put(header, updateDataType(columnDataTypes.get(header), value));
+                String detectedType = updateDataType(columnDataTypes.get(header), value);
+                columnDataTypes.put(header, detectedType);
             }
         }
 
@@ -73,18 +78,20 @@ public class DataTypeDetector {
 
     private static boolean isDate(String value) {
         try {
-            java.time.LocalDate.parse(value.trim());
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(CSVImportConfig.getDateFormat());
+            LocalDate.parse(value.trim(), formatter);
             return true;
-        } catch (java.time.format.DateTimeParseException e) {
+        } catch (DateTimeParseException e) {
             return false;
         }
     }
 
     private static boolean isTimestamp(String value) {
         try {
-            java.time.LocalDateTime.parse(value.trim());
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(CSVImportConfig.getTimestampFormat());
+            LocalDateTime.parse(value.trim(), formatter);
             return true;
-        } catch (java.time.format.DateTimeParseException e) {
+        } catch (DateTimeParseException e) {
             return false;
         }
     }

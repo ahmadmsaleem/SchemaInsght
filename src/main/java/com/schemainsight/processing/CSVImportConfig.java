@@ -2,21 +2,21 @@ package com.schemainsight.processing;
 
 public class CSVImportConfig {
     static char delimiter;
-    static int columnCount;
     static int skipRows;
-    private static String filePath;
     static String dateFormat;
+    static String timestampFormat;
     static String encoding;
     static int batchSize;
     static boolean trimWhitespace;
     static boolean enableHeader;
 
-    public CSVImportConfig(char delimiter, int columnCount, int skipRows, String filePath, String dateFormat, String encoding, int batchSize, boolean trimWhitespace, boolean enableHeader) {
+    public CSVImportConfig(char delimiter,
+                           int skipRows, String dateFormat, String timestampFormat, String encoding,
+                           int batchSize, boolean trimWhitespace, boolean enableHeader) {
         CSVImportConfig.delimiter = delimiter;
-        CSVImportConfig.columnCount = columnCount;
         CSVImportConfig.skipRows = skipRows;
-        CSVImportConfig.filePath = filePath;
         CSVImportConfig.dateFormat = dateFormat;
+        CSVImportConfig.timestampFormat = timestampFormat;
         CSVImportConfig.encoding = encoding;
         CSVImportConfig.batchSize = batchSize;
         CSVImportConfig.trimWhitespace = trimWhitespace;
@@ -27,20 +27,16 @@ public class CSVImportConfig {
         return delimiter;
     }
 
-    public static int getColumnCount() {
-        return columnCount;
-    }
-
     public static int getSkipRows() {
         return skipRows;
     }
 
-    public static String getFilePath() {
-        return filePath;
-    }
-
     public static String getDateFormat() {
         return dateFormat;
+    }
+
+    public static String getTimestampFormat() {
+        return timestampFormat;
     }
 
     public static String getEncoding() {
