@@ -1,10 +1,7 @@
 package com.schemainsight.userinterface.sidebar;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.control.TableView;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
@@ -13,12 +10,10 @@ import java.util.Map;
 
 public class TableInfoSideBar {
 
-    private VBox sidebar;
-    private TableView<Map<String, String>> tableView;
+    private final VBox sidebar;
     private VBox dataTypeVBox;
 
-    public TableInfoSideBar(TableView<Map<String, String>> tableView) {
-        this.tableView = tableView;
+    public TableInfoSideBar() {
         this.sidebar = createSidebar();
     }
 

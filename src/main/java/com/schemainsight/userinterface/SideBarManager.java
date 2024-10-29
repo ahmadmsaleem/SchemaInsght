@@ -19,7 +19,7 @@ public class SideBarManager {
 
     public SideBarManager(TableView<Map<String, String>> tableView) {
 
-        this.tableInfoSideBar = new TableInfoSideBar(tableView);
+        this.tableInfoSideBar = new TableInfoSideBar();
         this.dataLoader = new DataLoader(tableView, tableInfoSideBar);
         this.uploadSideBar = new UploadSideBar(dataLoader); // Pass the DataLoader directly
         this.connectionSideBar = new ConnectionSideBar();
