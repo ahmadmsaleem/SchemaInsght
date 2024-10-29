@@ -7,7 +7,6 @@ import com.schemainsight.userinterface.sidebar.UploadSideBar;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
 
 import java.util.Map;
 
@@ -25,7 +24,7 @@ public class SideBarManager {
         this.connectionSideBar = new ConnectionSideBar();
     }
 
-    public void initializeSidebars(Stage primaryStage, BorderPane root) {
+    public void initializeSidebars(BorderPane root) {
         VBox uploadSidebar = uploadSideBar.getSidebar(); // Use uploadSideBar
         root.setLeft(uploadSidebar);
         addWidthListener(root, uploadSidebar);

@@ -27,7 +27,7 @@ public class Main extends Application {
 
         root.setCenter(tableView);
         sideBarManager = new SideBarManager(tableView);
-        sideBarManager.initializeSidebars(primaryStage, root);
+        sideBarManager.initializeSidebars(root);
 
         TopBarManager topBarManager = new TopBarManager(sideBarManager, tableView);
         topBarManager.initializeTopBar(root);
