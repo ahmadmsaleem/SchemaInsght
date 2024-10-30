@@ -4,10 +4,9 @@ import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.stage.StageStyle;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.Reader;
+import java.io.*;
+import java.nio.charset.Charset;
+import java.nio.charset.UnsupportedCharsetException;
 import java.util.*;
 
 import org.apache.commons.csv.CSVFormat;
@@ -42,7 +41,7 @@ public class CSVProcessor {
     }
 
     // Configuration Dialog to gather inputs
-    public static Optional<CSVImportConfig> ConfigurationTable(char detectedDelimiter, String filePath) {
+    public static Optional<CSVImportConfig> ConfigurationTable(char detectedDelimiter) {
         Dialog<Optional<CSVImportConfig>> configurationDialog = new Dialog<>();
 
         configurationDialog.setTitle("Configuration Table");
@@ -53,7 +52,6 @@ public class CSVProcessor {
         grid.setVgap(10);
 
         TextField delimiterField = new TextField(String.valueOf(detectedDelimiter));
-        TextField columnCountField = new TextField("10");
         TextField skipRowsField = new TextField("0");
         TextField dateFormatField = new TextField("yyyy-MM-dd");
         TextField timestampFormatField = new TextField("yyyy-MM-dd HH:mm:ss");
@@ -66,20 +64,18 @@ public class CSVProcessor {
 
         grid.add(new Label("Enter delimiter:"), 0, 1);
         grid.add(delimiterField, 1, 1);
-        grid.add(new Label("Expected column count:"), 0, 2);
-        grid.add(columnCountField, 1, 2);
-        grid.add(new Label("Rows to skip:"), 0, 3);
-        grid.add(skipRowsField, 1, 3);
-        grid.add(new Label("Date format:"), 0, 4);
-        grid.add(dateFormatField, 1, 4);
-        grid.add(new Label("Timestamp format:"), 0, 5);
-        grid.add(timestampFormatField, 1, 5);
-        grid.add(new Label("Encoding:"), 0, 6);
-        grid.add(encodingField, 1, 6);
-        grid.add(new Label("Batch size:"), 0, 7);
-        grid.add(batchSizeField, 1, 7);
-        grid.add(trimWhitespaceCheckBox, 0, 8, 2, 1);
-        grid.add(enableHeaderCheckBox, 0, 9, 2, 1);
+        grid.add(new Label("Rows to skip:"), 0, 2);
+        grid.add(skipRowsField, 1, 2);
+        grid.add(new Label("Date format:"), 0, 3);
+        grid.add(dateFormatField, 1, 3);
+        grid.add(new Label("Timestamp format:"), 0, 4);
+        grid.add(timestampFormatField, 1, 4);
+        grid.add(new Label("Encoding:"), 0, 5);
+        grid.add(encodingField, 1, 5);
+        grid.add(new Label("Batch size:"), 0, 6);
+        grid.add(batchSizeField, 1, 6);
+        grid.add(trimWhitespaceCheckBox, 0, 7, 2, 1);
+        grid.add(enableHeaderCheckBox, 0, 8, 2, 1);
 
         configurationDialog.getDialogPane().setContent(grid);
         configurationDialog.getDialogPane().getButtonTypes().setAll(ButtonType.OK, ButtonType.CANCEL);
@@ -89,7 +85,7 @@ public class CSVProcessor {
             if (dialogButton == ButtonType.OK) {
                 try {
                     CSVImportConfig.delimiter = delimiterField.getText().charAt(0);
-                    CSVImportConfig.skipRows = skipRowsField.getText().charAt(0);
+                    CSVImportConfig.skipRows = Integer.parseInt(skipRowsField.getText());
                     CSVImportConfig.dateFormat = dateFormatField.getText();
                     CSVImportConfig.timestampFormat = timestampFormatField.getText();
                     CSVImportConfig.encoding = encodingField.getText();
@@ -136,65 +132,52 @@ public class CSVProcessor {
         }
     }
 
+
+
     public static List<Map<String, String>> readCSVFile(String filePath, char delimiter, int limit) {
         List<Map<String, String>> data = new ArrayList<>();
+        int bufferSize = 16 * 1024;
+        String encoding = CSVImportConfig.getEncoding();
+        try {
+            Charset.forName(encoding);
+        } catch (UnsupportedCharsetException e) {
+            encoding = "UTF-8";
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Unsupported encoding provided. Defaulting to UTF-8.");
+            alert.initStyle(StageStyle.UTILITY);
+            alert.showAndWait();
+        }
 
-        try (Reader in = new FileReader(filePath);
-             BufferedReader bufferedReader = new BufferedReader(in)) {
+        try (Reader in = new InputStreamReader(new FileInputStream(filePath), Charset.forName(encoding));
+             BufferedReader bufferedReader = new BufferedReader(in, bufferSize)) {
+
             CSVParser parser = CSVFormat.DEFAULT
                     .withDelimiter(delimiter)
                     .withFirstRecordAsHeader()
                     .parse(bufferedReader);
 
             Map<String, Integer> headerMap = parser.getHeaderMap();
-            int count = 0;
 
             for (CSVRecord record : parser) {
-                if (count >= limit) break;
+                if (data.size() >= limit) break;
 
                 Map<String, String> row = new LinkedHashMap<>();
                 for (String header : headerMap.keySet()) {
                     row.put(header, record.get(header));
                 }
                 data.add(row);
-                count++;
             }
+
         } catch (IOException e) {
-            e.printStackTrace();
+            Alert alert = new Alert(Alert.AlertType.ERROR, "I/O error occurred: " + e.getMessage());
+            alert.initStyle(StageStyle.UTILITY);
+            alert.showAndWait();
         }
 
         return data;
     }
-    public static ValidationResult validateCSV(String filePath, char delimiter) {
-        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
-            String line = br.readLine();
-            if (line == null || line.trim().isEmpty()) {
-                return new ValidationResult(false, "The file is empty or contains only whitespace.");
-            }
 
-            String[] columns = line.split(String.valueOf(delimiter));
-            if (columns.length == 0 || Arrays.stream(columns).anyMatch(String::isEmpty)) {
-                return new ValidationResult(false, "The header line does not contain valid column names.");
-            }
-
-            if (br.readLine() == null) {
-                return new ValidationResult(true, "The CSV file is valid but contains only headers with no data.");
-            }
-            return new ValidationResult(true, "The CSV file is valid.");
-        } catch (IOException e) {
-            return new ValidationResult(false, "An error occurred while reading the file: " + e.getMessage());
-        }
+    public static List<String> getSchema(String filePath, char delimiter) {
+        return getHeaders(filePath, delimiter);
     }
 
-    public static class ValidationResult {
-        private final boolean isValid;
-
-        public ValidationResult(boolean isValid, String message) {
-            this.isValid = isValid;
-        }
-
-        public boolean isValid() {
-            return isValid;
-        }
-    }
 }

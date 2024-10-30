@@ -40,10 +40,9 @@ public class UploadSideBar {
         Label titleLabel = createLabel();
         CustomButton uploadButton = createUploadButton();
         CustomButton viewUploadHistoryButton = createHistoryButton();
-        CustomButton viewSchemaButton = createSchemaButton();
         CustomButton exitButton = createExitButton();
 
-        sidebar.getChildren().addAll(titleLabel, uploadButton, viewUploadHistoryButton, viewSchemaButton, createSpacer(), exitButton);
+        sidebar.getChildren().addAll(titleLabel, uploadButton, viewUploadHistoryButton, createSpacer(), exitButton);
         return sidebar;
     }
 
@@ -61,10 +60,6 @@ public class UploadSideBar {
         return CustomButton.createSidebarButton("View Upload History", "See previously uploaded files.", event -> viewUploadHistory());
     }
 
-    private CustomButton createSchemaButton() {
-        return CustomButton.createSidebarButton("View Schema", null, event -> System.out.println("viewSchemaButton"));
-    }
-
     private CustomButton createExitButton() {
         return CustomButton.createSidebarButton("Exit", null, event -> System.exit(0));
     }
@@ -78,7 +73,7 @@ public class UploadSideBar {
         if (file != null) {
             String filePath = file.getAbsolutePath();
             char detectedDelimiter = CSVProcessor.detectDelimiter(filePath);
-            Optional<CSVImportConfig> confirmedConfigOpt = CSVProcessor.ConfigurationTable(detectedDelimiter, filePath);
+            Optional<CSVImportConfig> confirmedConfigOpt = CSVProcessor.ConfigurationTable(detectedDelimiter);
 
             confirmedConfigOpt.ifPresent(config -> {
                 loadDataCallback.accept(filePath, detectedDelimiter); // Pass the detected delimiter here
@@ -134,7 +129,7 @@ public class UploadSideBar {
 
     private void reUploadFile(String filePath) {
         char detectedDelimiter = CSVProcessor.detectDelimiter(filePath);
-        Optional<CSVImportConfig> confirmedConfigOpt = CSVProcessor.ConfigurationTable(detectedDelimiter, filePath);
+        Optional<CSVImportConfig> confirmedConfigOpt = CSVProcessor.ConfigurationTable(detectedDelimiter);
         confirmedConfigOpt.ifPresent(config -> loadDataCallback.accept(filePath, detectedDelimiter)); // Pass the detected delimiter here
     }
 
@@ -147,4 +142,5 @@ public class UploadSideBar {
         VBox.setVgrow(spacer, Priority.ALWAYS);
         return spacer;
     }
+
 }

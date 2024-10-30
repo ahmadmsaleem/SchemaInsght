@@ -22,9 +22,6 @@ public class DataLoader {
 
     public void loadData(String filePath, char confirmedDelimiter, int batchTerm) {
         clearPreviousData();
-        if (!CSVProcessor.validateCSV(filePath, confirmedDelimiter).isValid()) {
-            return;
-        }
         List<String> headers = CSVProcessor.getHeaders(filePath, confirmedDelimiter);
         Map<String, String> detectedDataTypes = DataTypeDetector.detectDataTypes(filePath, confirmedDelimiter);
         List<Map<String, String>> allData = CSVProcessor.readCSVFile(filePath, confirmedDelimiter, batchTerm);
@@ -33,6 +30,7 @@ public class DataLoader {
         tableData.addAll(allData);
         tableView.setItems(tableData);
     }
+
     public void uploadData(String filePath, char confirmedDelimiter) {
         loadData(filePath, confirmedDelimiter, CSVImportConfig.getBatchSize());
     }
