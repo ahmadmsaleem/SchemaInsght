@@ -33,6 +33,7 @@ public class DataLoader {
         tableData.addAll(allData);
         tableView.setItems(tableData);
     }
+
     public void uploadData(String filePath, char confirmedDelimiter) {
         loadData(filePath, confirmedDelimiter, CSVImportConfig.getBatchSize());
     }

@@ -18,8 +18,7 @@ public class DataTypeDetector {
             return columnDataTypes;
         }
 
-        String[] headers = data.get(0).keySet().toArray(new String[0]); // Access the first row for headers
-
+        String[] headers = data.get(0).keySet().toArray(new String[0]);
         for (int rowCount = 0; rowCount < Math.min(data.size(), 500); rowCount++) {
             for (String header : headers) {
                 String value = data.get(rowCount).get(header);
