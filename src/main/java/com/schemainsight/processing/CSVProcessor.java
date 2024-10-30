@@ -176,38 +176,6 @@ public class CSVProcessor {
         return data;
     }
 
-    public static ValidationResult validateCSV(String filePath, char delimiter) {
-        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
-            String line = br.readLine();
-            if (line == null || line.trim().isEmpty()) {
-                return new ValidationResult(false, "The file is empty or contains only whitespace.");
-            }
-
-            String[] columns = line.split(String.valueOf(delimiter));
-            if (columns.length == 0 || Arrays.stream(columns).anyMatch(String::isEmpty)) {
-                return new ValidationResult(false, "The header line does not contain valid column names.");
-            }
-
-            if (br.readLine() == null) {
-                return new ValidationResult(true, "The CSV file is valid but contains only headers with no data.");
-            }
-            return new ValidationResult(true, "The CSV file is valid.");
-        } catch (IOException e) {
-            return new ValidationResult(false, "An error occurred while reading the file: " + e.getMessage());
-        }
-    }
-
-    public static class ValidationResult {
-        private final boolean isValid;
-
-        public ValidationResult(boolean isValid, String message) {
-            this.isValid = isValid;
-        }
-
-        public boolean isValid() {
-            return isValid;
-        }
-    }
     public static List<String> getSchema(String filePath, char delimiter) {
         return getHeaders(filePath, delimiter);
     }

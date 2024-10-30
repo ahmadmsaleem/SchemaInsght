@@ -22,9 +22,6 @@ public class DataLoader {
 
     public void loadData(String filePath, char confirmedDelimiter, int batchTerm) {
         clearPreviousData();
-        if (!CSVProcessor.validateCSV(filePath, confirmedDelimiter).isValid()) {
-            return;
-        }
         List<String> headers = CSVProcessor.getHeaders(filePath, confirmedDelimiter);
         Map<String, String> detectedDataTypes = DataTypeDetector.detectDataTypes(filePath, confirmedDelimiter);
         List<Map<String, String>> allData = CSVProcessor.readCSVFile(filePath, confirmedDelimiter, batchTerm);
