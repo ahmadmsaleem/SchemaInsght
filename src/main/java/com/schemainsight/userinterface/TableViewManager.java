@@ -4,6 +4,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.Tooltip;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.MouseButton;
 import javafx.util.Duration;
 import javafx.scene.control.SelectionMode;
 
@@ -22,7 +23,7 @@ public class TableViewManager {
     private void initializeTableView() {
         tableView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
-        Tooltip tooltip = new Tooltip("Line(s) copied");
+        Tooltip tooltip = new Tooltip("Content copied");
         tableView.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
             if (tableView.getSelectionModel().getSelectedItems().size() > 1) {
                 copySelectedRowsToClipboard();
@@ -31,11 +32,35 @@ public class TableViewManager {
         });
 
         tableView.setOnMouseClicked(event -> {
-            if (event.getClickCount() == 2 && tableView.getSelectionModel().getSelectedItems().size() == 1) {
+            if (event.getClickCount() == 2 && event.getButton() == MouseButton.PRIMARY
+                    && tableView.getSelectionModel().getSelectedItems().size() == 1) {
                 copySelectedRowsToClipboard();
-                showTooltip(tooltip, event.getScreenX(), event.getScreenY());
+                showTooltip(tooltip, event.getScreenX(), event.getScreenY(), "Row copied");
+            }
+            else if (event.getClickCount() == 1 && event.getButton() == MouseButton.SECONDARY
+                    && tableView.getSelectionModel().getSelectedItems().size() == 1) {
+                Object cellValue = tableView.getSelectionModel().getSelectedItem()
+                        .get(tableView.getFocusModel().getFocusedCell().getTableColumn().getText());
+                if (cellValue != null) {
+                    copyToClipboard(cellValue.toString());
+                    showTooltip(tooltip, event.getScreenX(), event.getScreenY(), "Cell copied");
+                }
             }
         });
+    }
+
+    private void copyToClipboard(String content) {
+        Clipboard clipboard = Clipboard.getSystemClipboard();
+        ClipboardContent clipboardContent = new ClipboardContent();
+        clipboardContent.putString(content);
+        clipboard.setContent(clipboardContent);
+    }
+
+    private void showTooltip(Tooltip tooltip, double mouseX, double mouseY, String message) {
+        tooltip.setText(message);
+        tooltip.show(tableView.getScene().getWindow(), mouseX + 10, mouseY + 10);
+        tooltip.setAutoHide(true);
+        tooltip.setHideDelay(Duration.seconds(1));
     }
 
     private void copySelectedRowsToClipboard() {

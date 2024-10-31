@@ -23,9 +23,8 @@ public class UploadSideBar {
     private final BiConsumer<String, Character> loadDataCallback;
     private static final List<String> uploadHistory = new ArrayList<>();
 
-    // Updated constructor to accept DataLoader and retrieve the loadData method
     public UploadSideBar(DataLoader dataLoader) {
-        this.loadDataCallback = dataLoader::uploadData; // Reference to the uploadData method
+        this.loadDataCallback = dataLoader::uploadData;
         this.sidebar = createUploadSideBar();
     }
 

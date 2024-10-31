@@ -30,7 +30,6 @@ public class ConnectionSideBar {
         usernameField.setPromptText("Username");
         passwordField = new TextField();
         passwordField.setPromptText("Password");
-        passwordField.setPromptText("Password");
 
         connectButton = new Button("Connect");
         connectButton.setOnAction(event -> connectToDatabase());
