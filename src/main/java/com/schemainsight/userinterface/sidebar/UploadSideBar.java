@@ -87,7 +87,6 @@ public class UploadSideBar {
         }
     }
 
-    // New method to handle upload from database
     private void uploadFromDatabase() {
         System.out.println("Upload from Database button clicked - action not implemented yet.");
     }
@@ -140,11 +139,14 @@ public class UploadSideBar {
     private void reUploadFile(String filePath) {
         char detectedDelimiter = CSVProcessor.detectDelimiter(filePath);
         Optional<CSVImportConfig> confirmedConfigOpt = CSVProcessor.ConfigurationTable(detectedDelimiter);
-        confirmedConfigOpt.ifPresent(config -> loadDataCallback.accept(filePath, detectedDelimiter));
+        confirmedConfigOpt.ifPresent(config -> {
+            loadDataCallback.accept(filePath, detectedDelimiter);
+            updateUploadHistory(filePath);
+        });
     }
 
     public static String getLatestFilePath() {
-        return uploadHistory.isEmpty() ? null : uploadHistory.get(uploadHistory.size() - 1); // Corrected to use size() - 1
+        return uploadHistory.isEmpty() ? null : uploadHistory.getLast();
     }
 
     private Region createSpacer() {
