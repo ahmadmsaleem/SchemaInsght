@@ -1,9 +1,15 @@
 package com.schemainsight.userinterface.sidebar;
 
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import com.schemainsight.userinterface.CustomButton;
+import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
+import javafx.stage.StageStyle;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 public class ConnectionSideBar {
 
@@ -12,7 +18,20 @@ public class ConnectionSideBar {
     private TextField usernameField;
     private TextField passwordField;
     private Button connectButton;
-    private Label statusLabel;
+    private TextArea statusTextArea; // Changed to TextArea
+    private Button showTablesButton;
+    private Button closeConnectionButton;
+    private Button helpButton;
+
+    private Connection connection;
+
+    public VBox getSidebar() {
+        return sidebar;
+    }
+
+    public Connection getConnection() {
+        return connection;
+    }
 
     public ConnectionSideBar() {
         sidebar = new VBox();
@@ -26,33 +45,152 @@ public class ConnectionSideBar {
 
         urlField = new TextField();
         urlField.setPromptText("Database URL");
+
         usernameField = new TextField();
         usernameField.setPromptText("Username");
-        passwordField = new TextField();
+
+        passwordField = new PasswordField();
         passwordField.setPromptText("Password");
 
         connectButton = new Button("Connect");
         connectButton.setOnAction(event -> connectToDatabase());
 
-        statusLabel = new Label();
-        statusLabel.getStyleClass().add("connection-status");
+        statusTextArea = new TextArea();
+        statusTextArea.setEditable(false);
+        statusTextArea.setWrapText(true);
+        statusTextArea.setPrefHeight(100);
+        statusTextArea.getStyleClass().add("myTextArea");
 
-        sidebar.getChildren().addAll(titleLabel, urlField, usernameField, passwordField, connectButton, statusLabel);
-    }
+        showTablesButton = CustomButton.createSidebarButton("Show Tables", "Show all tables in the database", event -> showTables());
+        showTablesButton.setDisable(true);
 
-    public VBox getSidebar() {
-        return sidebar;
+        closeConnectionButton = CustomButton.createSidebarButton("Close Connection", "Close the current database connection", event -> closeConnection());
+        closeConnectionButton.setDisable(true);
+
+        helpButton = CustomButton.createSidebarButton("Help", "Get started with database connection", event -> showHelpDialog());
+
+        sidebar.getChildren().addAll(titleLabel, urlField, usernameField, passwordField, connectButton, statusTextArea, showTablesButton, closeConnectionButton, helpButton);
     }
 
     private void connectToDatabase() {
-        String url = urlField.getText();
+        String url = urlField.getText().trim();
         String username = usernameField.getText();
-        String password = passwordField.getText();
+        String password = passwordField.getText().trim();
 
         if (!url.isEmpty() && !username.isEmpty() && !password.isEmpty()) {
-            statusLabel.setText("SOON");
+            try {
+                connection = DriverManager.getConnection(url, username, password);
+                statusTextArea.setText("Connected successfully!");
+                showTablesButton.setDisable(false);
+                closeConnectionButton.setDisable(false);
+            } catch (SQLException e) {
+                statusTextArea.setText("Connection failed:\n" + e.getMessage());
+                e.printStackTrace();
+                showTablesButton.setDisable(true);
+                closeConnectionButton.setDisable(true);
+            }
         } else {
-            statusLabel.setText("SOON.");
+            statusTextArea.setText("Please fill in all fields.");
         }
     }
+
+    private void showTables() {
+        if (connection != null) {
+            try (Statement stmt = connection.createStatement();
+                 ResultSet rs = stmt.executeQuery("SELECT table_name FROM information_schema.tables WHERE table_schema='public'")) {
+
+                StringBuilder tables = new StringBuilder("Tables:\n");
+                while (rs.next()) {
+                    tables.append(rs.getString("table_name")).append("\n");
+                }
+                showTablesDialog(tables.toString());
+
+            } catch (SQLException e) {
+                statusTextArea.setText("Error retrieving tables:\n " + e.getMessage());
+                e.printStackTrace();
+            }
+        } else {
+            statusTextArea.setText("Not connected to a database.");
+        }
+    }
+
+    private void showTablesDialog(String tables) {
+        Dialog<String> tablesDialog = new Dialog<>();
+        tablesDialog.setTitle("Database Tables");
+        tablesDialog.setHeaderText("List of Tables in the Database");
+        tablesDialog.getDialogPane().getStylesheets().add("styles.css");
+        tablesDialog.getDialogPane().getStyleClass().add("myDialog");
+        tablesDialog.initStyle(StageStyle.UTILITY);
+        TextArea tablesTextArea = new TextArea(tables);
+        tablesTextArea.setEditable(false);
+        tablesTextArea.setWrapText(true);
+        VBox dialogPaneContent = new VBox(tablesTextArea);
+        tablesDialog.getDialogPane().setContent(dialogPaneContent);
+        ButtonType closeButtonType = new ButtonType("CLOSE", ButtonBar.ButtonData.OK_DONE);
+        tablesDialog.getDialogPane().getButtonTypes().add(closeButtonType);
+        Button closeButton = (Button) tablesDialog.getDialogPane().lookupButton(closeButtonType);
+        closeButton.getStyleClass().add("cancel");
+        tablesDialog.showAndWait();
+    }
+
+    private void closeConnection() {
+        if (connection != null) {
+            try {
+                connection.close();
+                statusTextArea.setText("Connection closed.");
+                showTablesButton.setDisable(true);
+                closeConnectionButton.setDisable(true);
+            } catch (SQLException e) {
+                statusTextArea.setText("Failed to close connection: " + e.getMessage());
+                e.printStackTrace();
+            }
+        } else {
+            statusTextArea.setText("No connection to close.");
+        }
+    }
+
+    private void showHelpDialog() {
+        Dialog<String> helpDialog = new Dialog<>();
+        helpDialog.setTitle("Database Connection Help");
+        helpDialog.setHeaderText("Guidance for Setting Up Database Connection");
+
+        helpDialog.getDialogPane().getStylesheets().add("styles.css");
+        helpDialog.getDialogPane().getStyleClass().add("myDialog");
+        helpDialog.initStyle(StageStyle.UTILITY);
+
+        helpDialog.setWidth(600);
+        helpDialog.setHeight(650);
+
+        TextArea helpTextArea = new TextArea();
+        helpTextArea.setText(
+                "To connect to a PostgreSQL database, please fill in the following details:\n\n" +
+                        "- Database URL: Format - jdbc:postgresql://<host>:<port>/<database>\n" +
+                        "  Example: jdbc:postgresql://localhost:5432/mydatabase\n\n" +
+                        "    - <host>: The address of the PostgreSQL server (e.g., localhost for local connections).\n" +
+                        "    - <port>: The port number on which the PostgreSQL server is listening (default is 5432).\n" +
+                        "    - <database>: The name of the database you want to connect to.\n\n" +
+                        "- Username: Your PostgreSQL username (e.g., postgres). Make sure you have the right privileges.\n\n" +
+                        "- Password: The password associated with the username. Ensure this is kept secure.\n\n" +
+                        "Once filled, click 'Connect' to establish the connection. If successful, the application will allow you to view the database tables.\n\n" +
+                        "If you encounter any issues:\n" +
+                        "1. Check that the PostgreSQL server is running.\n" +
+                        "2. Ensure the firewall settings allow connections on the specified port.\n" +
+                        "3. Verify that the username and password are correct."
+        );
+        helpTextArea.setEditable(false);
+
+        helpTextArea.getStyleClass().add("myDialog");
+        helpTextArea.setPrefHeight(500);
+        helpTextArea.setPrefWidth(550);
+        helpTextArea.setWrapText(true);
+
+        VBox dialogPaneContent = new VBox(helpTextArea);
+        helpDialog.getDialogPane().setContent(dialogPaneContent);
+        ButtonType closeButtonType = new ButtonType("CLOSE", ButtonBar.ButtonData.OK_DONE);
+        helpDialog.getDialogPane().getButtonTypes().add(closeButtonType);
+        Button closeButton = (Button) helpDialog.getDialogPane().lookupButton(closeButtonType);
+        closeButton.getStyleClass().add("cancel");
+        helpDialog.showAndWait();
+    }
+
 }

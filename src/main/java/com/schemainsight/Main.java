@@ -18,11 +18,14 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) {
+        // Initialize the TableViewManager and SideBarManager first
         TableViewManager tableViewManager = new TableViewManager(tableView);
+        sideBarManager = new SideBarManager(tableView);  // Initialize sideBarManager here
+
+        // Now pass the initialized sideBarManager to TopBarManager
         TopBarManager topBarManager = new TopBarManager(sideBarManager, tableView);
         BorderPane root = new BorderPane();
         Scene scene = new Scene(root, 900, 650);
-
 
         scene.getStylesheets().add("styles.css");
         primaryStage.setScene(scene);
@@ -30,10 +33,10 @@ public class Main extends Application {
         root.getStyleClass().add("main-pane");
 
         root.setCenter(tableView);
-        sideBarManager = new SideBarManager(tableView);
+
+        // Initialize sidebars and top bar
         sideBarManager.initializeSidebars(root);
         topBarManager.initializeTopBar(root);
-
 
         primaryStage.show();
     }

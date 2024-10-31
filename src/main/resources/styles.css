@@ -3,9 +3,11 @@
     -fx-background-color-main: #2e3036;
     -fx-background-color-sidebar: #252931;
     -fx-background-color-button: #4E545D;
+
+
     -fx-background-color-button-hover: #3c4148;
     -fx-background-color-header: #282828;
-    -fx-background-color-dialog: #282828;
+    -fx-background-color-dialog: #1f1f1f;
     -fx-background-color-dialog-button-ok: #00c900;
     -fx-background-color-dialog-button-cancel: #dc1704;
 
@@ -16,10 +18,13 @@
 }
 
 /* General styles */
+.sidebar-title, .connection-status {
+    -fx-text-fill: -fx-text-fill-default;
+}
+
 .root {
     -fx-font-family: "Verdana";
     -fx-font-color: -fx-text-fill-default;
-
 }
 
 .main-pane {
@@ -42,6 +47,26 @@
     -fx-font-size: 18px;
     -fx-text-fill: -fx-text-fill-default;
 }
+
+.myTextArea {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-font-size: 10px;
+    -fx-text-fill: -fx-text-fill-default;
+}
+
+.myTextArea .scroll-pane {
+    -fx-background-color: transparent;
+}
+
+.myTextArea .scroll-pane .viewport{
+    -fx-background-color: transparent;
+}
+
+.myTextArea .scroll-pane .content{
+    -fx-background-color: transparent;
+}
+
 
 /* File content area */
 .file-content-area {

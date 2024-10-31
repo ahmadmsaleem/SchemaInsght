@@ -38,10 +38,12 @@ public class UploadSideBar {
 
         Label titleLabel = createLabel();
         CustomButton uploadButton = createUploadButton();
+        CustomButton uploadFromDatabaseButton = createUploadFromDatabaseButton();
+        uploadFromDatabaseButton.setDisable(true);
         CustomButton viewUploadHistoryButton = createHistoryButton();
         CustomButton exitButton = createExitButton();
 
-        sidebar.getChildren().addAll(titleLabel, uploadButton, viewUploadHistoryButton, createSpacer(), exitButton);
+        sidebar.getChildren().addAll(titleLabel, uploadButton, uploadFromDatabaseButton, viewUploadHistoryButton, createSpacer(), exitButton);
         return sidebar;
     }
 
@@ -53,6 +55,10 @@ public class UploadSideBar {
 
     private CustomButton createUploadButton() {
         return CustomButton.createSidebarButton("Upload File", "Supports CSV file uploads only.", event -> uploadFile());
+    }
+
+    private CustomButton createUploadFromDatabaseButton() {
+        return CustomButton.createSidebarButton("Upload from Database", "Upload data directly from the database.", event -> uploadFromDatabase());
     }
 
     private CustomButton createHistoryButton() {
@@ -75,10 +81,15 @@ public class UploadSideBar {
             Optional<CSVImportConfig> confirmedConfigOpt = CSVProcessor.ConfigurationTable(detectedDelimiter);
 
             confirmedConfigOpt.ifPresent(config -> {
-                loadDataCallback.accept(filePath, detectedDelimiter); // Pass the detected delimiter here
+                loadDataCallback.accept(filePath, detectedDelimiter);
                 updateUploadHistory(filePath);
             });
         }
+    }
+
+    // New method to handle upload from database
+    private void uploadFromDatabase() {
+        System.out.println("Upload from Database button clicked - action not implemented yet.");
     }
 
     private void updateUploadHistory(String filePath) {
@@ -129,11 +140,11 @@ public class UploadSideBar {
     private void reUploadFile(String filePath) {
         char detectedDelimiter = CSVProcessor.detectDelimiter(filePath);
         Optional<CSVImportConfig> confirmedConfigOpt = CSVProcessor.ConfigurationTable(detectedDelimiter);
-        confirmedConfigOpt.ifPresent(config -> loadDataCallback.accept(filePath, detectedDelimiter)); // Pass the detected delimiter here
+        confirmedConfigOpt.ifPresent(config -> loadDataCallback.accept(filePath, detectedDelimiter));
     }
 
     public static String getLatestFilePath() {
-        return uploadHistory.isEmpty() ? null : uploadHistory.get(uploadHistory.size() - 1); // Fixed to get last item
+        return uploadHistory.isEmpty() ? null : uploadHistory.get(uploadHistory.size() - 1); // Corrected to use size() - 1
     }
 
     private Region createSpacer() {
@@ -141,5 +152,4 @@ public class UploadSideBar {
         VBox.setVgrow(spacer, Priority.ALWAYS);
         return spacer;
     }
-
 }
