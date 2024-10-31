@@ -16,14 +16,12 @@ public class FileSearcher {
 
         try (Reader reader = new FileReader(filePath);
              CSVParser parser = CSVFormat.DEFAULT
-                     .withDelimiter(CSVImportConfig.getDelimiter()) // Assuming `CSVImportConfig` has a method to get delimiter
+                     .withDelimiter(CSVImportConfig.getDelimiter())
                      .withFirstRecordAsHeader()
                      .parse(reader)) {
 
-            // Retrieve headers from the CSV file
             List<String> headers = parser.getHeaderNames();
 
-            // Iterate over each record
             for (CSVRecord record : parser) {
                 if (record.toString().contains(searchTerm)) {
                     Map<String, String> rowMap = new LinkedHashMap<>();
