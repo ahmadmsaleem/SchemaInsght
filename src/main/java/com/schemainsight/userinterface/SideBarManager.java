@@ -21,7 +21,7 @@ public class SideBarManager {
         this.tableInfoSideBar = new TableInfoSideBar();
         this.dataLoader = new DataLoader(tableView, tableInfoSideBar);
         this.uploadSideBar = new UploadSideBar(dataLoader); // Pass the DataLoader directly
-        this.connectionSideBar = new ConnectionSideBar();
+        this.connectionSideBar = new ConnectionSideBar(tableView); // Pass the tableView
     }
 
     public void initializeSidebars(BorderPane root) {

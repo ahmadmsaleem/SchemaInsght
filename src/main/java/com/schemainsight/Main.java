@@ -3,6 +3,7 @@ package com.schemainsight;
 import com.schemainsight.userinterface.SideBarManager;
 import com.schemainsight.userinterface.TableViewManager;
 import com.schemainsight.userinterface.TopBarManager;
+import com.schemainsight.userinterface.sidebar.ConnectionSideBar;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
@@ -15,12 +16,15 @@ public class Main extends Application {
 
     private SideBarManager sideBarManager;
     private TableView<Map<String, String>> tableView = new TableView<>();
+    private ConnectionSideBar connectionSideBar;
 
     @Override
     public void start(Stage primaryStage) {
         // Initialize the TableViewManager and SideBarManager first
         TableViewManager tableViewManager = new TableViewManager(tableView);
         sideBarManager = new SideBarManager(tableView);  // Initialize sideBarManager here
+        connectionSideBar = new ConnectionSideBar(tableView);
+
 
         // Now pass the initialized sideBarManager to TopBarManager
         TopBarManager topBarManager = new TopBarManager(sideBarManager, tableView);

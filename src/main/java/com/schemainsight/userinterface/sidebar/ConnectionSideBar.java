@@ -1,15 +1,16 @@
 package com.schemainsight.userinterface.sidebar;
 
 import com.schemainsight.userinterface.CustomButton;
+import javafx.beans.property.ReadOnlyStringWrapper;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.stage.StageStyle;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ConnectionSideBar {
 
@@ -22,6 +23,16 @@ public class ConnectionSideBar {
     private Button showTablesButton;
     private Button closeConnectionButton;
     private Button helpButton;
+    private Button fetchDataButton;
+
+    private TableView<Map<String, String>> tableView;
+
+    public ConnectionSideBar(TableView<Map<String, String>> tableView) {
+        this.tableView = tableView;
+        sidebar = new VBox();
+        sidebar.getStyleClass().add("connectionSideBar");
+        createConnectionUI();
+    }
 
     private Connection connection;
 
@@ -43,10 +54,10 @@ public class ConnectionSideBar {
         Label titleLabel = new Label("Database");
         titleLabel.getStyleClass().add("sidebar-title");
 
-        urlField = new TextField();
+        urlField = new TextField("jdbc:postgresql://localhost:5432/test");
         urlField.setPromptText("Database URL");
 
-        usernameField = new TextField();
+        usernameField = new TextField("postgres");
         usernameField.setPromptText("Username");
 
         passwordField = new PasswordField();
@@ -61,6 +72,10 @@ public class ConnectionSideBar {
         statusTextArea.setPrefHeight(100);
         statusTextArea.getStyleClass().add("myTextArea");
 
+        fetchDataButton = new Button("Fetch Data");
+        fetchDataButton.setOnAction(event -> fetchData());
+
+
         showTablesButton = CustomButton.createSidebarButton("Show Tables", "Show all tables in the database", event -> showTables());
         showTablesButton.setDisable(true);
 
@@ -69,7 +84,7 @@ public class ConnectionSideBar {
 
         helpButton = CustomButton.createSidebarButton("Help", "Get started with database connection", event -> showHelpDialog());
 
-        sidebar.getChildren().addAll(titleLabel, urlField, usernameField, passwordField, connectButton, statusTextArea, showTablesButton, closeConnectionButton, helpButton);
+        sidebar.getChildren().addAll(titleLabel, urlField, usernameField, passwordField, connectButton, statusTextArea, showTablesButton, closeConnectionButton, helpButton,fetchDataButton);
     }
 
     private void connectToDatabase() {
@@ -191,6 +206,46 @@ public class ConnectionSideBar {
         Button closeButton = (Button) helpDialog.getDialogPane().lookupButton(closeButtonType);
         closeButton.getStyleClass().add("cancel");
         helpDialog.showAndWait();
+    }
+
+
+
+    // Inside ConnectionSideBar
+    private void fetchData() {
+        if (connection != null && tableView != null) {
+            try (Statement stmt = connection.createStatement();
+                 ResultSet rs = stmt.executeQuery("SELECT * FROM public.test")) {
+
+                // Set up columns based on ResultSet metadata
+                ResultSetMetaData metaData = rs.getMetaData();
+                int columnCount = metaData.getColumnCount();
+                tableView.getColumns().clear();  // Clear old columns
+                for (int i = 1; i <= columnCount; i++) {
+                    String columnName = metaData.getColumnName(i);
+                    TableColumn<Map<String, String>, String> column = new TableColumn<>(columnName);
+                    column.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().get(columnName)));
+                    tableView.getColumns().add(column);
+                }
+
+                // Fetch data and add to TableView
+                ObservableList<Map<String, String>> data = FXCollections.observableArrayList();
+                while (rs.next()) {
+                    Map<String, String> row = new HashMap<>();
+                    for (int i = 1; i <= columnCount; i++) {
+                        row.put(metaData.getColumnName(i), rs.getString(i));
+                    }
+                    data.add(row);
+                }
+                tableView.setItems(data);
+                statusTextArea.setText("Data fetched successfully!");
+
+            } catch (SQLException e) {
+                statusTextArea.setText("Error fetching data:\n" + e.getMessage());
+                e.printStackTrace();
+            }
+        } else {
+            statusTextArea.setText("Not connected to a database or table view is not initialized.");
+        }
     }
 
 }
