@@ -13,7 +13,7 @@ import java.util.Map;
 
 public class TableViewManager {
 
-    private TableView<Map<String, String>> tableView;
+    private final TableView<Map<String, String>> tableView;
 
     public TableViewManager(TableView<Map<String, String>> tableView) {
         this.tableView = tableView;
@@ -70,7 +70,7 @@ public class TableViewManager {
             ClipboardContent content = new ClipboardContent();
 
             StringBuilder rowData = new StringBuilder();
-            String headers = String.join(";", selectedRows.get(0).keySet());
+            String headers = String.join(";", selectedRows.getFirst().keySet());
             rowData.append(headers).append("\n");
 
             for (Map<String, String> row : selectedRows) {
@@ -91,12 +91,6 @@ public class TableViewManager {
         tooltip.setHideDelay(Duration.seconds(1));
     }
 
-
-    private void showTooltip(Tooltip tooltip, double mouseX, double mouseY) {
-        tooltip.show(tableView.getScene().getWindow(), mouseX + 10, mouseY + 10);
-        tooltip.setAutoHide(true);
-        tooltip.setHideDelay(Duration.seconds(1));
-    }
 
 
 }

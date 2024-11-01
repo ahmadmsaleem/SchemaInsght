@@ -35,7 +35,6 @@ public class TopBarManager {
         tableInfoButton.setOnAction(event -> sideBarManager.toggleSideBar(root, "tableInfo"));
         connectionButton.setOnAction(event -> sideBarManager.toggleSideBar(root, "connection"));
 
-        // Create the top bar layout
         HBox topBarBox = new HBox(10, toggleUploadSideBarButton, tableInfoButton, connectionButton, spacer, searchButton, settingsButton);
         topBarBox.getStyleClass().add("top-bar-box");
         root.setTop(topBarBox);
@@ -105,7 +104,6 @@ public class TopBarManager {
         searchDialog.setTitle("Search");
         searchDialog.setHeaderText("Enter search details.");
 
-        // UI elements for the dialog
         TextField searchTermField = new TextField();
         searchTermField.setPromptText("Search:");
         searchTermField.getStyleClass().add("search-term-field");
