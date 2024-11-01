@@ -3,7 +3,9 @@ package com.schemainsight.userinterface.sidebar;
 import com.schemainsight.processing.CSVImportConfig;
 import com.schemainsight.processing.CSVProcessor;
 import com.schemainsight.processing.DataLoader;
+import com.schemainsight.processing.DataTypeDetector;
 import com.schemainsight.userinterface.CustomButton;
+import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
@@ -11,21 +13,30 @@ import javafx.stage.Stage;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.stage.StageStyle;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.ButtonType;
 
+import java.sql.*;
+import java.util.*;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 import java.util.function.BiConsumer;
 
 public class UploadSideBar {
     private final VBox sidebar;
     private final BiConsumer<String, Character> loadDataCallback;
+    private final ConnectionSideBar connectionSideBar;
+    private final TableView<Map<String, String>> tableView;
     private static final List<String> uploadHistory = new ArrayList<>();
+    private final TableInfoSideBar tableInfoSideBar;
 
-    public UploadSideBar(DataLoader dataLoader) {
+    public UploadSideBar(DataLoader dataLoader, ConnectionSideBar connectionSideBar, TableView<Map<String, String>> tableView, TableInfoSideBar tableInfoSideBar) {
+        this.tableView = tableView;
         this.loadDataCallback = dataLoader::uploadData;
+        this.tableInfoSideBar = tableInfoSideBar;
         this.sidebar = createUploadSideBar();
+        this.connectionSideBar = connectionSideBar;
     }
 
     public VBox getSidebar() {
@@ -39,7 +50,6 @@ public class UploadSideBar {
         Label titleLabel = createLabel();
         CustomButton uploadButton = createUploadButton();
         CustomButton uploadFromDatabaseButton = createUploadFromDatabaseButton();
-        uploadFromDatabaseButton.setDisable(true);
         CustomButton viewUploadHistoryButton = createHistoryButton();
         CustomButton exitButton = createExitButton();
 
@@ -85,10 +95,6 @@ public class UploadSideBar {
                 updateUploadHistory(filePath);
             });
         }
-    }
-
-    private void uploadFromDatabase() {
-        System.out.println("Upload from Database button clicked - action not implemented yet.");
     }
 
     private void updateUploadHistory(String filePath) {
@@ -154,4 +160,121 @@ public class UploadSideBar {
         VBox.setVgrow(spacer, Priority.ALWAYS);
         return spacer;
     }
+
+    private void uploadFromDatabase() {
+        Connection connection = connectionSideBar.getConnection();
+        if (connection == null) {
+            showNoConnectionDialog();
+            return;
+        }
+
+        ObservableList<String> tableNames = FXCollections.observableArrayList();
+        try (Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery("SELECT table_name FROM information_schema.tables WHERE table_schema='public'")) {
+
+            while (rs.next()) {
+                tableNames.add(rs.getString("table_name"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return;
+        }
+
+        Dialog<String> tablesDialog = new Dialog<>();
+        tablesDialog.setTitle("Database Tables");
+        tablesDialog.setHeaderText("Select a Table to Upload Data From");
+        tablesDialog.getDialogPane().getStylesheets().add("styles.css");
+        tablesDialog.getDialogPane().getStyleClass().add("myDialog");
+        tablesDialog.initStyle(StageStyle.UTILITY);
+
+        ListView<String> tableListView = new ListView<>(tableNames);
+        tableListView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+
+        VBox dialogPaneContent = new VBox(tableListView);
+        tablesDialog.getDialogPane().setContent(dialogPaneContent);
+
+        tablesDialog.getDialogPane().getButtonTypes().setAll(ButtonType.OK, ButtonType.CANCEL);
+
+        Button okButton = (Button) tablesDialog.getDialogPane().lookupButton(ButtonType.OK);
+        okButton.getStyleClass().add("ok");
+        Button cancelButton = (Button) tablesDialog.getDialogPane().lookupButton(ButtonType.CANCEL);
+        cancelButton.getStyleClass().add("cancel");
+
+        tablesDialog.setResultConverter(dialogButton -> {
+            if (dialogButton == ButtonType.OK && !tableListView.getSelectionModel().isEmpty()) {
+                return tableListView.getSelectionModel().getSelectedItem();
+            }
+            return null;
+        });
+
+        Optional<String> selectedTableOpt = tablesDialog.showAndWait();
+        selectedTableOpt.ifPresent(selectedTable -> {
+            if (selectedTable != null) {
+                fetchData(selectedTable);
+            }
+        });
+    }
+
+    private void showNoConnectionDialog() {
+        Dialog<Void> noConnectionDialog = new Dialog<>();
+        noConnectionDialog.setTitle("No Connection");
+        noConnectionDialog.setHeaderText("No database connection available.");
+        noConnectionDialog.getDialogPane().getStylesheets().add("styles.css");
+        noConnectionDialog.getDialogPane().getStyleClass().add("myDialog");
+        noConnectionDialog.initStyle(StageStyle.UTILITY);
+
+        Label messageLabel = new Label("Please connect to the database before trying to upload data.");
+        noConnectionDialog.getDialogPane().setContent(messageLabel);
+
+        noConnectionDialog.getDialogPane().getButtonTypes().setAll(ButtonType.OK);
+
+        Button okButton = (Button) noConnectionDialog.getDialogPane().lookupButton(ButtonType.OK);
+        okButton.getStyleClass().add("ok");
+
+        noConnectionDialog.showAndWait();
+    }
+
+    private void fetchData(String tableName) {
+        Connection connection = connectionSideBar.getConnection();
+        try (Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery("SELECT * FROM public." + tableName)) {
+            ResultSetMetaData metaData = rs.getMetaData();
+            int columnCount = metaData.getColumnCount();
+            tableView.getColumns().clear();
+
+            // Prepare a list to hold data for type detection
+            List<Map<String, String>> dataList = new ArrayList<>();
+
+            for (int i = 1; i <= columnCount; i++) {
+                String columnName = metaData.getColumnName(i);
+                TableColumn<Map<String, String>, String> column = new TableColumn<>(columnName);
+                column.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().get(columnName)));
+                tableView.getColumns().add(column);
+            }
+
+            ObservableList<Map<String, String>> data = FXCollections.observableArrayList();
+            while (rs.next()) {
+                Map<String, String> row = new HashMap<>();
+                for (int i = 1; i <= columnCount; i++) {
+                    String value = rs.getString(i);
+                    row.put(metaData.getColumnName(i), value);
+                }
+                data.add(row);
+                dataList.add(row);
+            }
+
+            Map<String, String> detectedTypes = DataTypeDetector.detectDataTypesForDatabase(dataList);
+            tableInfoSideBar.updateDataTypes(detectedTypes);
+
+            for (Map.Entry<String, String> entry : detectedTypes.entrySet()) {
+                System.out.println("Column: " + entry.getKey() + ", Detected Type: " + entry.getValue());
+
+            }
+
+            tableView.setItems(data);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
 }

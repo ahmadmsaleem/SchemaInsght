@@ -30,6 +30,26 @@ public class DataTypeDetector {
         return columnDataTypes;
     }
 
+    public static Map<String, String> detectDataTypesForDatabase(List<Map<String, String>> data) {
+        Map<String, String> columnDataTypes = new LinkedHashMap<>();
+
+        if (data.isEmpty()) {
+            return columnDataTypes;
+        }
+
+        String[] headers = data.get(0).keySet().toArray(new String[0]);
+        for (int rowCount = 0; rowCount < Math.min(data.size(), 500); rowCount++) {
+            for (String header : headers) {
+                String value = data.get(rowCount).get(header);
+                String detectedType = updateDataType(columnDataTypes.get(header), value);
+                columnDataTypes.put(header, detectedType);
+            }
+        }
+
+        return columnDataTypes;
+    }
+
+
     private static String updateDataType(String existingType, String value) {
         if (value == null || value.trim().isEmpty()) {
             return existingType != null ? existingType : "VARCHAR";
@@ -77,7 +97,9 @@ public class DataTypeDetector {
 
     private static boolean isDate(String value) {
         try {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(CSVImportConfig.getDateFormat());
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(
+                    CSVImportConfig.getDateFormat() != null ? CSVImportConfig.getDateFormat() : "yyyy-MM-dd"
+            );
             LocalDate.parse(value.trim(), formatter);
             return true;
         } catch (DateTimeParseException e) {
@@ -87,7 +109,9 @@ public class DataTypeDetector {
 
     private static boolean isTimestamp(String value) {
         try {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(CSVImportConfig.getTimestampFormat());
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(
+                    CSVImportConfig.getTimestampFormat() != null ? CSVImportConfig.getTimestampFormat() : "yyyy-MM-dd HH:mm:ss"
+            );
             LocalDateTime.parse(value.trim(), formatter);
             return true;
         } catch (DateTimeParseException e) {

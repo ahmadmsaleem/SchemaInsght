@@ -17,15 +17,14 @@ public class SideBarManager {
     private final DataLoader dataLoader;
 
     public SideBarManager(TableView<Map<String, String>> tableView) {
-
+        this.connectionSideBar = new ConnectionSideBar();
         this.tableInfoSideBar = new TableInfoSideBar();
         this.dataLoader = new DataLoader(tableView, tableInfoSideBar);
-        this.uploadSideBar = new UploadSideBar(dataLoader); // Pass the DataLoader directly
-        this.connectionSideBar = new ConnectionSideBar(tableView); // Pass the tableView
+        this.uploadSideBar = new UploadSideBar(dataLoader, connectionSideBar, tableView, tableInfoSideBar);
     }
 
     public void initializeSidebars(BorderPane root) {
-        VBox uploadSidebar = uploadSideBar.getSidebar(); // Use uploadSideBar
+        VBox uploadSidebar = uploadSideBar.getSidebar();
         root.setLeft(uploadSidebar);
         addWidthListener(root, uploadSidebar);
 
