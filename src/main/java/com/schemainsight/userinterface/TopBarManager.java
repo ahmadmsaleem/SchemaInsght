@@ -47,6 +47,12 @@ public class TopBarManager {
             showDialog("Warning", "No file uploaded.", "Please upload a file before searching.");
             return;
         }
+        if (latestFilePath.trim().startsWith("Data Repository")) {
+            showAlert("Feature Coming Soon", "The ability to view the schema for database tables will be available soon.");
+            return;
+        }
+
+
 
         Dialog<ButtonType> searchDialog = createSearchDialog();
         Optional<ButtonType> result = searchDialog.showAndWait();
@@ -139,4 +145,14 @@ public class TopBarManager {
     private boolean isValidInteger(String str) {
         return str != null && str.matches("\\d+");
     }
+
+    private void showAlert(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.initStyle(StageStyle.UTILITY);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
 }

@@ -142,13 +142,19 @@ public class UploadSideBar {
         result.ifPresent(this::reUploadFile);
     }
 
-    private void reUploadFile(String filePath) {
-        char detectedDelimiter = CSVProcessor.detectDelimiter(filePath);
-        Optional<CSVImportConfig> confirmedConfigOpt = CSVProcessor.ConfigurationTable(detectedDelimiter);
-        confirmedConfigOpt.ifPresent(config -> {
-            loadDataCallback.accept(filePath, detectedDelimiter);
-            updateUploadHistory(filePath);
-        });
+    private void reUploadFile(String entry) {
+        if (entry.trim().toUpperCase().startsWith("DATA REPOSITORY")) {
+            String[] queryParts = entry.split(" ");
+            String tableName = queryParts[queryParts.length - 1];
+            fetchData(tableName);
+        } else {
+            char detectedDelimiter = CSVProcessor.detectDelimiter(entry);
+            Optional<CSVImportConfig> confirmedConfigOpt = CSVProcessor.ConfigurationTable(detectedDelimiter);
+            confirmedConfigOpt.ifPresent(config -> {
+                loadDataCallback.accept(entry, detectedDelimiter);
+                updateUploadHistory(entry);
+            });
+        }
     }
 
     public static String getLatestFilePath() {
@@ -170,10 +176,12 @@ public class UploadSideBar {
 
         ObservableList<String> tableNames = FXCollections.observableArrayList();
         try (Statement stmt = connection.createStatement();
-             ResultSet rs = stmt.executeQuery("SELECT table_name FROM information_schema.tables WHERE table_schema='public'")) {
+             ResultSet rs = stmt.executeQuery("SELECT table_schema, table_name FROM information_schema.tables WHERE table_type='BASE TABLE'")) {
 
             while (rs.next()) {
-                tableNames.add(rs.getString("table_name"));
+                String schemaName = rs.getString("table_schema");
+                String tableName = rs.getString("table_name");
+                tableNames.add(schemaName + "." + tableName);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -190,7 +198,20 @@ public class UploadSideBar {
         ListView<String> tableListView = new ListView<>(tableNames);
         tableListView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
 
-        VBox dialogPaneContent = new VBox(tableListView);
+        TextField searchField = new TextField();
+        searchField.setPromptText("Search tables...");
+
+        searchField.textProperty().addListener((observable, oldValue, newValue) -> {
+            ObservableList<String> filteredList = FXCollections.observableArrayList();
+            for (String table : tableNames) {
+                if (table.toLowerCase().contains(newValue.toLowerCase())) {
+                    filteredList.add(table);
+                }
+            }
+            tableListView.setItems(filteredList);
+        });
+
+        VBox dialogPaneContent = new VBox(searchField, tableListView);
         tablesDialog.getDialogPane().setContent(dialogPaneContent);
 
         tablesDialog.getDialogPane().getButtonTypes().setAll(ButtonType.OK, ButtonType.CANCEL);
@@ -234,15 +255,16 @@ public class UploadSideBar {
         noConnectionDialog.showAndWait();
     }
 
-    private void fetchData(String tableName) {
+    private void fetchData(String fullTableName) {
         Connection connection = connectionSideBar.getConnection();
+        String selectQuery = "SELECT * FROM " + fullTableName;
         try (Statement stmt = connection.createStatement();
-             ResultSet rs = stmt.executeQuery("SELECT * FROM public." + tableName)) {
+             ResultSet rs = stmt.executeQuery(selectQuery)) {
+
             ResultSetMetaData metaData = rs.getMetaData();
             int columnCount = metaData.getColumnCount();
             tableView.getColumns().clear();
 
-            // Prepare a list to hold data for type detection
             List<Map<String, String>> dataList = new ArrayList<>();
 
             for (int i = 1; i <= columnCount; i++) {
@@ -265,13 +287,9 @@ public class UploadSideBar {
 
             Map<String, String> detectedTypes = DataTypeDetector.detectDataTypesForDatabase(dataList);
             tableInfoSideBar.updateDataTypes(detectedTypes);
-
-            for (Map.Entry<String, String> entry : detectedTypes.entrySet()) {
-                System.out.println("Column: " + entry.getKey() + ", Detected Type: " + entry.getValue());
-
-            }
-
             tableView.setItems(data);
+
+            updateUploadHistory("Data Repository: " + fullTableName);
         } catch (SQLException e) {
             e.printStackTrace();
         }

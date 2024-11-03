@@ -48,6 +48,11 @@ public class TableInfoSideBar {
             showAlert("No File Uploaded", "Please upload a file to view its schema.");
             return;
         }
+        if (filePath.trim().startsWith("Data Repository")) {
+            showAlert("Feature Coming Soon", "The ability to view the schema for database tables will be available soon.");
+            return;
+        }
+
 
         File file = new File(filePath);
         long fileSize = file.length();
