@@ -9,6 +9,10 @@ import javafx.scene.layout.VBox;
 import javafx.stage.StageStyle;
 
 import java.io.File;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -16,9 +20,11 @@ public class TableInfoSideBar {
 
     private final VBox sidebar;
     private Map<String, String> detectedDataTypes;
+    private final ConnectionSideBar connectionSideBar;
 
-    public TableInfoSideBar() {
+    public TableInfoSideBar(ConnectionSideBar connectionSideBar) {
         this.sidebar = createSidebar();
+        this.connectionSideBar = connectionSideBar;
     }
 
     public VBox getSidebar() {
@@ -48,22 +54,55 @@ public class TableInfoSideBar {
             showAlert("No File Uploaded", "Please upload a file to view its schema.");
             return;
         }
-        if (filePath.trim().startsWith("Data Repository")) {
-            showAlert("Feature Coming Soon", "The ability to view the schema for database tables will be available soon.");
+
+        if (filePath.trim().startsWith("Data Repository:")) {
+            handleDatabaseSchema(filePath);
+        } else {
+            handleCSVSchema(filePath);
+        }
+    }
+
+    private void handleDatabaseSchema(String filePath) {
+        Connection connection = connectionSideBar.getConnection();
+        if (connection == null) {
+            showAlert("No connection", "Check your connection.");
             return;
         }
 
+        String[] schemaTableParts = filePath.split(":")[1].trim().split("\\.");
+        String schemaName = schemaTableParts[0];
+        String tableName = schemaTableParts[1];
 
+        Map<String, String> schema = getTableSchema(connection, schemaName, tableName);
+        if (schema.isEmpty()) {
+            showAlert("Schema Not Found", "Could not retrieve schema for table: " + tableName);
+            return;
+        }
+
+        String tableSize = getTableSize(connection, schemaName, tableName);
+        showSchemaDialog("Table Schema", "Schema for table: " + tableName + " (Size: " + tableSize + ")", schema);
+    }
+
+    private void handleCSVSchema(String filePath) {
         File file = new File(filePath);
         long fileSize = file.length();
         String fileSizeFormatted = formatFileSize(fileSize);
-
         char detectedDelimiter = CSVProcessor.detectDelimiter(filePath);
         List<String> schema = CSVProcessor.getSchema(filePath, detectedDelimiter);
 
-        Dialog<List<String>> schemaDialog = new Dialog<>();
-        schemaDialog.setTitle("CSV Schema");
-        schemaDialog.setHeaderText("Schema for file: " + filePath);
+        Map<String, String> schemaMap = new HashMap<>();
+        for (String column : schema) {
+            schemaMap.put(column, detectedDataTypes.get(column));
+        }
+
+        String fileName = file.getName();
+        showSchemaDialog("CSV Schema", "Schema for file: " + fileName + " (File Size: " + fileSizeFormatted + ")", schemaMap);
+    }
+
+    private void showSchemaDialog(String title, String header, Map<String, String> schema) {
+        Dialog<Map<String, String>> schemaDialog = new Dialog<>();
+        schemaDialog.setTitle(title);
+        schemaDialog.setHeaderText(header);
         schemaDialog.getDialogPane().getStylesheets().add("styles.css");
         schemaDialog.getDialogPane().getStyleClass().add("myDialog");
         schemaDialog.initStyle(StageStyle.UTILITY);
@@ -71,23 +110,36 @@ public class TableInfoSideBar {
         VBox content = new VBox(10);
         content.setPadding(new javafx.geometry.Insets(10));
         ListView<String> schemaListView = new ListView<>();
-        schemaListView.getItems().addAll(schema);
-
-        Label fileSizeLabel = new Label("File Size: " + fileSizeFormatted);
-        content.getChildren().addAll(fileSizeLabel);
-
-        schemaListView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue != null) {
-                String dataType = detectedDataTypes.get(newValue);
-                showDataTypeInfo(dataType, content);
-            }
-        });
-
+        schema.forEach((column, dataType) -> schemaListView.getItems().add(column + " - " + dataType));
         content.getChildren().addAll(new Label("Schema:"), schemaListView);
+
         schemaDialog.getDialogPane().setContent(content);
         schemaDialog.getDialogPane().getButtonTypes().add(ButtonType.OK);
 
+        Button okButton = (Button) schemaDialog.getDialogPane().lookupButton(ButtonType.OK);
+        okButton.getStyleClass().add("ok");
+
         schemaDialog.showAndWait();
+    }
+
+    private Map<String, String> getTableSchema(Connection connection, String schemaName, String tableName) {
+        Map<String, String> columnDataTypes = new HashMap<>();
+        String query = "SELECT column_name, data_type FROM information_schema.columns WHERE table_schema = ? AND table_name = ?";
+
+        try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+            pstmt.setString(1, schemaName);
+            pstmt.setString(2, tableName);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    columnDataTypes.put(rs.getString("column_name"), rs.getString("data_type"));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return columnDataTypes;
     }
 
     private String formatFileSize(long sizeInBytes) {
@@ -103,13 +155,24 @@ public class TableInfoSideBar {
         return String.format("%.2f %s", size, units[unitIndex]);
     }
 
-    private void showDataTypeInfo(String dataType, VBox content) {
-        if (content.getChildren().size() > 4) {
-            content.getChildren().remove(4, content.getChildren().size());
+
+    public String getTableSize(Connection connection, String schemaName, String tableName) {
+        String query = "SELECT pg_size_pretty(pg_total_relation_size(?::regclass)) AS table_size";
+        String tableSize = null;
+
+        try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+            pstmt.setString(1, schemaName + "." + tableName);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    tableSize = rs.getString("table_size");
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        Label dataTypeLabel = new Label("Data Type: " + (dataType != null ? dataType : "N/A"));
-        dataTypeLabel.getStyleClass().add("data-type-info");
-        content.getChildren().add(dataTypeLabel);
+
+        return tableSize;
     }
 
     private void showAlert(String title, String message) {

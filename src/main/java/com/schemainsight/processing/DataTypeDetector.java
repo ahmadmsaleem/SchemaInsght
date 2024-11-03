@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,7 +19,7 @@ public class DataTypeDetector {
             return columnDataTypes;
         }
 
-        String[] headers = data.get(0).keySet().toArray(new String[0]);
+        String[] headers = data.getFirst().keySet().toArray(new String[0]);
         for (int rowCount = 0; rowCount < Math.min(data.size(), 500); rowCount++) {
             for (String header : headers) {
                 String value = data.get(rowCount).get(header);
@@ -30,24 +31,6 @@ public class DataTypeDetector {
         return columnDataTypes;
     }
 
-    public static Map<String, String> detectDataTypesForDatabase(List<Map<String, String>> data) {
-        Map<String, String> columnDataTypes = new LinkedHashMap<>();
-
-        if (data.isEmpty()) {
-            return columnDataTypes;
-        }
-
-        String[] headers = data.get(0).keySet().toArray(new String[0]);
-        for (int rowCount = 0; rowCount < Math.min(data.size(), 500); rowCount++) {
-            for (String header : headers) {
-                String value = data.get(rowCount).get(header);
-                String detectedType = updateDataType(columnDataTypes.get(header), value);
-                columnDataTypes.put(header, detectedType);
-            }
-        }
-
-        return columnDataTypes;
-    }
 
 
     private static String updateDataType(String existingType, String value) {

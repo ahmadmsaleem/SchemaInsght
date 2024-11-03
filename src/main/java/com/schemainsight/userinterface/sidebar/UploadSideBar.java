@@ -285,8 +285,7 @@ public class UploadSideBar {
                 dataList.add(row);
             }
 
-            Map<String, String> detectedTypes = DataTypeDetector.detectDataTypesForDatabase(dataList);
-            tableInfoSideBar.updateDataTypes(detectedTypes);
+
             tableView.setItems(data);
 
             updateUploadHistory("Data Repository: " + fullTableName);
