@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,7 +19,7 @@ public class DataTypeDetector {
             return columnDataTypes;
         }
 
-        String[] headers = data.get(0).keySet().toArray(new String[0]);
+        String[] headers = data.getFirst().keySet().toArray(new String[0]);
         for (int rowCount = 0; rowCount < Math.min(data.size(), 500); rowCount++) {
             for (String header : headers) {
                 String value = data.get(rowCount).get(header);
@@ -29,6 +30,8 @@ public class DataTypeDetector {
 
         return columnDataTypes;
     }
+
+
 
     private static String updateDataType(String existingType, String value) {
         if (value == null || value.trim().isEmpty()) {
@@ -77,7 +80,9 @@ public class DataTypeDetector {
 
     private static boolean isDate(String value) {
         try {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(CSVImportConfig.getDateFormat());
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(
+                    CSVImportConfig.getDateFormat() != null ? CSVImportConfig.getDateFormat() : "yyyy-MM-dd"
+            );
             LocalDate.parse(value.trim(), formatter);
             return true;
         } catch (DateTimeParseException e) {
@@ -87,7 +92,9 @@ public class DataTypeDetector {
 
     private static boolean isTimestamp(String value) {
         try {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(CSVImportConfig.getTimestampFormat());
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(
+                    CSVImportConfig.getTimestampFormat() != null ? CSVImportConfig.getTimestampFormat() : "yyyy-MM-dd HH:mm:ss"
+            );
             LocalDateTime.parse(value.trim(), formatter);
             return true;
         } catch (DateTimeParseException e) {

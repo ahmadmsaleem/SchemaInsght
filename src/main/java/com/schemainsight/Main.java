@@ -13,16 +13,17 @@ import java.util.Map;
 
 public class Main extends Application {
 
-    private SideBarManager sideBarManager;
-    private TableView<Map<String, String>> tableView = new TableView<>();
+    private final TableView<Map<String, String>> tableView = new TableView<>();
 
     @Override
     public void start(Stage primaryStage) {
         TableViewManager tableViewManager = new TableViewManager(tableView);
+        SideBarManager sideBarManager = new SideBarManager(tableView);
+
+
         TopBarManager topBarManager = new TopBarManager(sideBarManager, tableView);
         BorderPane root = new BorderPane();
         Scene scene = new Scene(root, 900, 650);
-
 
         scene.getStylesheets().add("styles.css");
         primaryStage.setScene(scene);
@@ -30,10 +31,9 @@ public class Main extends Application {
         root.getStyleClass().add("main-pane");
 
         root.setCenter(tableView);
-        sideBarManager = new SideBarManager(tableView);
+
         sideBarManager.initializeSidebars(root);
         topBarManager.initializeTopBar(root);
-
 
         primaryStage.show();
     }

@@ -3,9 +3,11 @@
     -fx-background-color-main: #2e3036;
     -fx-background-color-sidebar: #252931;
     -fx-background-color-button: #4E545D;
+
+
     -fx-background-color-button-hover: #3c4148;
     -fx-background-color-header: #282828;
-    -fx-background-color-dialog: #282828;
+    -fx-background-color-dialog: #1f1f1f;
     -fx-background-color-dialog-button-ok: #00c900;
     -fx-background-color-dialog-button-cancel: #dc1704;
 
@@ -16,10 +18,13 @@
 }
 
 /* General styles */
+.sidebar-title, .connection-status {
+    -fx-text-fill: -fx-text-fill-default;
+}
+
 .root {
     -fx-font-family: "Verdana";
     -fx-font-color: -fx-text-fill-default;
-
 }
 
 .main-pane {
@@ -43,6 +48,44 @@
     -fx-text-fill: -fx-text-fill-default;
 }
 
+/* Style for TextField (URL, Username, Password) */
+.text-field {
+    -fx-pref-width: 250px;
+    -fx-padding: 10px;
+    -fx-border-color: #ccc;
+    -fx-border-radius: 0px;
+    -fx-background-radius: 0px;
+    -fx-background-color: transparent;
+    -fx-text-fill: -fx-text-fill-default;
+}
+.text-field:focused {
+    -fx-border-color: #0066cc;
+    -fx-background-color: transparent;
+}
+
+
+
+
+.myTextArea {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-font-size: 10px;
+    -fx-text-fill: -fx-text-fill-default;
+}
+
+.myTextArea .scroll-pane {
+    -fx-background-color: transparent;
+}
+
+.myTextArea .scroll-pane .viewport{
+    -fx-background-color: transparent;
+}
+
+.myTextArea .scroll-pane .content{
+    -fx-background-color: transparent;
+}
+
+
 /* File content area */
 .file-content-area {
     -fx-font-size: 13px;
@@ -64,7 +107,8 @@
     -fx-font-size: 14px;
     -fx-background-color: -fx-background-color-button;
     -fx-text-fill: white;
-    -fx-border-radius: 0;
+    -fx-border-radius: 0px;
+    -fx-background-radius: 0px;
 }
 
 .top-button:hover {

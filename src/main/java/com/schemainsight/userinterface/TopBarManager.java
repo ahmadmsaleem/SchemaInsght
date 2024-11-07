@@ -35,7 +35,6 @@ public class TopBarManager {
         tableInfoButton.setOnAction(event -> sideBarManager.toggleSideBar(root, "tableInfo"));
         connectionButton.setOnAction(event -> sideBarManager.toggleSideBar(root, "connection"));
 
-        // Create the top bar layout
         HBox topBarBox = new HBox(10, toggleUploadSideBarButton, tableInfoButton, connectionButton, spacer, searchButton, settingsButton);
         topBarBox.getStyleClass().add("top-bar-box");
         root.setTop(topBarBox);
@@ -48,6 +47,12 @@ public class TopBarManager {
             showDialog("Warning", "No file uploaded.", "Please upload a file before searching.");
             return;
         }
+        if (latestFilePath.trim().startsWith("Data Repository")) {
+            showAlert("Feature Coming Soon", "The ability to view the schema for database tables will be available soon.");
+            return;
+        }
+
+
 
         Dialog<ButtonType> searchDialog = createSearchDialog();
         Optional<ButtonType> result = searchDialog.showAndWait();
@@ -105,7 +110,6 @@ public class TopBarManager {
         searchDialog.setTitle("Search");
         searchDialog.setHeaderText("Enter search details.");
 
-        // UI elements for the dialog
         TextField searchTermField = new TextField();
         searchTermField.setPromptText("Search:");
         searchTermField.getStyleClass().add("search-term-field");
@@ -141,4 +145,14 @@ public class TopBarManager {
     private boolean isValidInteger(String str) {
         return str != null && str.matches("\\d+");
     }
+
+    private void showAlert(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.initStyle(StageStyle.UTILITY);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
 }
